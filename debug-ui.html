@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>通信测试</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    button { margin: 10px; padding: 10px; }
+    #log { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>通信测试</h1>
+  <button onclick="sendMessage('get-image')">获取图像</button>
+  <button onclick="sendMessage('generate-report')">生成报告</button>
+  <div id="log">日志：</div>
+
+  <script>
+    function sendMessage(type) {
+      console.log('发送消息:', type);
+      document.getElementById('log').innerHTML += '<br>发送: ' + type;
+      parent.postMessage({ pluginMessage: { type: type } }, '*');
+    }
+
+    onmessage = (event) => {
+      console.log('收到消息:', event.data);
+      document.getElementById('log').innerHTML += '<br>收到: ' + JSON.stringify(event.data.pluginMessage);
+    };
+
+    // 测试通信
+    setTimeout(() => {
+      console.log('初始化测试');
+      document.getElementById('log').innerHTML += '<br>初始化测试';
+      sendMessage('get-image');
+    }, 1000);
+  </script>
+</body>
+</html>

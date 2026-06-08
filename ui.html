@@ -1,0 +1,2904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Vision Tester 🚥</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #FEFDFC;
+      min-height: 100vh;
+      color: #2d2a26;
+    }
+    .page { display: none; min-height: 100vh; padding: 20px; }
+    .page.active { display: block; }
+    .card {
+      background: white;
+      border-radius: 0px;
+      padding: 24px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(210, 180, 140, 0.2);
+    }
+    .btn {
+      padding: 12px 24px;
+      border-radius: 0px;
+      border: none;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: linear-gradient(135deg, #D6643E 0%, #c96442 100%); color: white; }
+    .btn-secondary { background: #f5efe8; color: #3d3d3a; }
+    .btn-secondary:hover { background: #e8ddd0; }
+    .btn-ghost { background: transparent; border: 2px solid #e0d5c8; color: #3d3d3a; }
+    .btn-ghost:hover { background: #f5efe8; border-color: #D6643E; }
+    .btn-small { padding: 8px 16px; font-size: 13px; border-radius: 0px; }
+    .hidden { display: none !important; }
+    .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .back-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 0px; border: 2px solid #e0d5c8; background: white; font-size: 14px; font-weight: 600; cursor: pointer; color: #3d3d3a; }
+    .back-btn:hover { background: #f5efe8; }
+    .back-btn svg path { fill: #3d3d3a; }
+    
+    /* MAIN PAGE */
+    .main-header { display: flex; flex-direction: column; align-items: stretch; margin-bottom: 8px; gap: 16px; }
+    .header-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .header-left { flex: 1; min-width: 0; }
+    .main-header h1 { font-size: 28px; font-weight: 800; margin: 0; color: #141413; font-family: SimSun, 宋体, serif; line-height: 1.2; }
+    .lang-switcher { flex-shrink: 0; display: flex; align-items: center; gap: 8px; }
+    .lang-option {
+      width: 36px;
+      height: 22px;
+      padding: 0;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: #97928A;
+      font-size: 12px;
+      line-height: 22px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      vertical-align: middle;
+    }
+    .lang-option:hover {
+      color: #7f796f;
+    }
+    .lang-option.active {
+      background: #F4EFE7;
+      color: #D6643E;
+    }
+    .subtitle { font-size: 12px; color: #8e8b82; white-space: nowrap; margin-bottom: 24px; }
+    .type-selector { display: flex; flex-wrap: nowrap; gap: 10px; justify-content: flex-start; margin-bottom: 20px; min-height: 32px; overflow-x: auto; overflow-y: hidden; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+    .type-selector::-webkit-scrollbar { height: 4px; }
+    .type-selector::-webkit-scrollbar-track { background: transparent; }
+    .type-selector::-webkit-scrollbar-thumb { background: #e0d5c8; border-radius: 0px; }
+    .type-btn { padding: 0 16px; height: 32px; border: 1.5px solid #EFE9DE; border-radius: 0px; background: transparent; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; color: #3d3d3a; white-space: nowrap; flex-shrink: 0; }
+    .type-btn:hover { border-color: #D6643E; }
+    .type-btn.active { background: transparent; border: 1.5px solid #D6643E; color: #3d3d3a; }
+    .preview-container { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+    .preview-box { border-radius: 0px; overflow: hidden; background: white; border: 1px solid rgba(210, 180, 140, 0.2); }
+    .preview-label { padding: 10px 14px; background: #f5efe8; font-size: 12px; font-weight: 600; border-bottom: none; color: #3d3d3a; }
+    .preview-content { height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: repeating-conic-gradient(#f5efe8 25%, #ffffff 0 50%, #f5efe8 0 75%, #ffffff 0) 0 0 / 24px 24px; position: relative; }
+    .preview-content canvas { max-width: 100%; max-height: 100%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .placeholder-text { color: #9a8b7a; font-size: 14px; text-align: center; }
+    .game-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px; }
+    .game-card { background: transparent; border-radius: 0px; padding: 20px; cursor: pointer; transition: all 0.3s ease; border: 1px solid #e6dfd8; }
+    .game-card:hover { border-color: #e6dfd8; background: #f5f0e8; }
+    .game-icon { font-size: 32px; margin-bottom: 12px; }
+    .game-card h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; color: #2d2a26; }
+    .game-card p { font-size: 13px; color: #7a6a55; line-height: 1.5; }
+    .info-box { background: transparent; border-radius: 0; padding: 0; border-left: none; margin-top: 40px; }
+    .info-box strong { color: #a09d96; }
+    .info-box p { font-size: 11px; color: #a09d96; line-height: 1.6; margin: 0; }
+    .info-box p + p { margin-top: 4px; }
+    
+    /* GAME 1: ISHIHARA */
+    .ishihara-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .progress-text { font-size: 14px; font-weight: 600; color: #7a6a55; min-width: 80px; }
+    .progress-bar { flex: 1; height: 8px; background: #e8ddd0; border-radius: 0px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #D6643E 0%, #c96442 100%); transition: width 0.3s ease; border-radius: 0px; }
+    .plate-container { width: 100%; max-width: 360px; aspect-ratio: 1; margin: 0 auto 24px; position: relative; }
+    .plate-placeholder { width: 100%; height: 100%; border-radius: 0px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #f5efe8 0%, #e8ddd0 100%); font-size: 60px; color: #c9bab0; box-shadow: 0 4px 20px rgba(139, 90, 43, 0.12); overflow: hidden; }
+    .plate-image { width: 100%; height: 100%; display: block; object-fit: contain; background: #f8f5f1; }
+    .answer-display { text-align: center; font-size: 36px; font-weight: 800; min-height: 50px; color: #D6643E; margin-bottom: 16px; letter-spacing: 4px; }
+    .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 280px; margin: 0 auto 16px; }
+    .num-btn { aspect-ratio: 1; font-size: 22px; font-weight: 700; border-radius: 0px; border: 2px solid #e0d5c8; background: white; cursor: pointer; transition: all 0.15s ease; color: #3d3d3a; }
+    .num-btn:hover { border-color: #D6643E; background: #fff5ef; }
+    .num-btn:active { transform: scale(0.96); }
+    .action-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .btn-nothing { background: #fff8e6; color: #925b0e; border: 2px solid #ffe8b8; }
+    .btn-nothing:hover { background: #ffe8b8; }
+    .btn-skip { background: #f5efe8; color: #7a6a55; border: 2px solid #e8ddd0; }
+    .btn-skip:hover { background: #e8ddd0; }
+    .btn-clear { background: #ffe8e4; color: #c9412e; border: 2px solid #ffd4cc; }
+    .btn-clear:hover { background: #ffd4cc; }
+    .shortcut-hint { text-align: center; font-size: 12px; color: #9a8b7a; }
+    .analyzing-steps { max-width: 300px; margin: 0 auto; }
+    .step { display: flex; align-items: center; gap: 12px; padding: 14px; background: #f5efe8; border-radius: 0px; margin-bottom: 10px; opacity: 0.4; transition: all 0.3s ease; }
+    .step.active { opacity: 1; background: #fff5ef; }
+    .step.completed { opacity: 1; background: #f0fff4; }
+    .step-icon { width: 24px; height: 24px; border-radius: 0px; background: #e0d5c8; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .step.active .step-icon { background: #D6643E; color: white; animation: pulse 1s infinite; }
+    .step.completed .step-icon { background: #10b981; color: white; }
+    .step-text { font-size: 14px; font-weight: 600; color: #3d3d3a; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+    .result-header { text-align: center; margin-bottom: 20px; }
+    .result-icon { font-size: 64px; margin-bottom: 12px; }
+    .result-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; color: #2d2a26; }
+    .result-score { font-size: 36px; font-weight: 800; color: #D6643E; }
+    .result-detail { background: #f5efe8; border-radius: 0px; padding: 16px; margin-bottom: 16px; }
+    .result-detail h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #2d2a26; }
+    .result-detail p { font-size: 13px; color: #7a6a55; line-height: 1.6; }
+    .disclaimer { font-size: 12px; color: #9a8b7a; text-align: center; padding-top: 16px; border-top: 1px solid #e8ddd0; margin-top: 16px; line-height: 1.5; }
+    .landing-icon { font-size: 80px; text-align: center; margin-bottom: 20px; }
+    .landing-title { text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 12px; color: #2d2a26; }
+    .landing-desc { text-align: center; font-size: 15px; color: #7a6a55; line-height: 1.6; margin-bottom: 24px; }
+    .feature-list { background: #f5efe8; border-radius: 0px; padding: 16px; margin-bottom: 24px; }
+    .feature-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 14px; color: #3d3d3a; }
+    .feature-icon { width: 24px; height: 24px; background: #D6643E; color: white; border-radius: 0px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+    
+    /* GAME 2: COLOR DIFF */
+    .game2-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .stat-box { text-align: center; padding: 12px 16px; background: #f5efe8; border-radius: 0px; min-width: 90px; }
+    .stat-label { font-size: 12px; color: #9a8b7a; margin-bottom: 4px; }
+    .stat-value { font-size: 24px; font-weight: 800; color: #D6643E; }
+    .stat-value.timer { color: #c9412e; }
+    .stat-value.bouncing { animation: bounce 0.3s ease; }
+    @keyframes bounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+    .grid-container2 { max-width: 360px; margin: 0 auto 20px; aspect-ratio: 1; }
+    .color-grid { display: grid; gap: 8px; height: 100%; transition: opacity 0.2s ease; }
+    .color-grid.fade-out { opacity: 0; }
+    .color-grid.fade-in { opacity: 1; }
+    .color-tile { border-radius: 0px; cursor: pointer; transition: transform 0.1s ease; }
+    .color-tile:hover { transform: scale(1.03); }
+    .color-tile:active { transform: scale(0.97); }
+    .grid-container2.shake { animation: shake 0.4s ease; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-8px)} 80%{transform:translateX(8px)} }
+    .flash-red { animation: flashRed 0.1s ease; }
+    @keyframes flashRed { 0%,100%{background:transparent} 50%{background:rgba(220,38,38,0.2)} }
+    .difficulty-selector { display: flex; gap: 10px; justify-content: center; margin-bottom: 16px; }
+    .diff-btn { padding: 10px 20px; border-radius: 0px; border: 2px solid #e0d5c8; background: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; color: #3d3d3a; }
+    .diff-btn:hover { border-color: #D6643E; }
+    .diff-btn.active { border-color: #D6643E; background: #D6643E; color: white; }
+    .game2-result h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; text-align: center; color: #2d2a26; }
+    .game2-result .score-big { font-size: 56px; font-weight: 900; text-align: center; color: #D6643E; margin: 16px 0; }
+    .result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+    .stat-card { text-align: center; padding: 16px; background: #f5efe8; border-radius: 0px; }
+    .stat-card .num { font-size: 28px; font-weight: 800; color: #D6643E; margin-bottom: 4px; }
+    .stat-card .label { font-size: 12px; color: #9a8b7a; }
+    .title-badge { text-align: center; padding: 12px 20px; background: linear-gradient(135deg, #fff8e6 0%, #ffe8b8 100%); border-radius: 0px; font-size: 16px; font-weight: 700; color: #925b0e; display: inline-block; margin: 16px 0; }
+    .highscore-box { background: #f0fff4; border: 2px solid #10b981; border-radius: 0px; padding: 16px; text-align: center; margin-bottom: 20px; }
+    .highscore-box .label { font-size: 13px; color: #059669; margin-bottom: 4px; }
+    .highscore-box .value { font-size: 32px; font-weight: 800; color: #047857; }
+    
+    /* GAME 3: MOSAIC */
+    .top-stats { display: flex; gap: 12px; margin-bottom: 20px; }
+    .axis-card { flex: 1; padding: 14px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-radius: 0px; box-shadow: 0 2px 12px rgba(139, 90, 43, 0.06); border: 1px solid rgba(224, 213, 200, 0.5); }
+    .axis-card h4 { font-size: 12px; font-weight: 700; color: #9a8b7a; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .axis-value { font-size: 28px; font-weight: 800; color: #D6643E; }
+    .axis-card.warning .axis-value { color: #f59e0b; animation: pulse 0.5s ease; }
+    .canvas-container { width: 100%; max-width: 380px; aspect-ratio: 1; margin: 0 auto 20px; background: #2d2a26; border-radius: 0px; overflow: hidden; box-shadow: 0 4px 20px rgba(139, 90, 43, 0.15); }
+    .mosaic-canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+    .bottom-dock { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .mosaic-hint { text-align: center; font-size: 13px; color: #7a6a55; }
+    .mosaic-result { text-align: center; }
+    .mosaic-result h2 { font-size: 26px; font-weight: 800; margin-bottom: 16px; color: #2d2a26; }
+    .axis-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+    .axis-result-card { background: #f5efe8; border-radius: 0px; padding: 16px; }
+    .axis-result-card .axis-name { font-size: 12px; font-weight: 700; color: #9a8b7a; margin-bottom: 8px; text-transform: uppercase; }
+    .axis-result-card .axis-level { font-size: 28px; font-weight: 800; color: #D6643E; }
+    
+    /* 主菜单样式 */
+    .main-menu { display: flex; gap: 0; justify-content: flex-start; flex-shrink: 0; width: 100%; background: #f5f0e8; border-radius: 0px; padding: 3px; height: 44px; }
+    .menu-tab { flex: 1 1 0; min-width: 0; height: 38px; display: flex; align-items: center; justify-content: center; border-radius: 0px; border: none; background: transparent; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; color: #3d3d3a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; text-align: center; gap: 6px; }
+    .menu-tab:hover { color: #141413; }
+    .menu-tab.active { background: #D6643E; color: white; }
+    .menu-tab svg path { fill: #3D3D3A; }
+    .menu-tab.active svg path { fill: white; }
+    
+    /* 颜色模式新样式 */
+    .color-mode-container { padding: 0; }
+    .select-color-section { background: transparent; border-radius: 0; border: none; padding: 0; margin-bottom: 24px; }
+    .select-color-label { display: block; font-family: -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 0.875rem; font-weight: 700; color: #3d3d3a; margin-bottom: 16px; }
+    .color-input-wrapper { display: flex; gap: 16px; align-items: stretch; }
+    #color-picker { width: 48px; height: 48px; border-radius: 0px; border: 1px solid #e0d5c8; cursor: pointer; padding: 0; }
+    #color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+    #color-picker::-webkit-color-swatch { border: none; border-radius: 0px; }
+    #hex-input { flex: 1; padding: 0 16px; border-radius: 0px; border: 1px solid #e0d5c8; background: transparent; color: #2d2a26; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; font-weight: 600; height: 48px; }
+    #hex-input:focus { outline: none; border-color: #D6643E; box-shadow: 0 0 0 3px #ffe8db; }
+    .mode-cards-grid { display: flex; gap: 16px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+    .mode-cards-grid::-webkit-scrollbar { height: 4px; }
+    .mode-cards-grid::-webkit-scrollbar-track { background: transparent; }
+    .mode-cards-grid::-webkit-scrollbar-thumb { background: #e0d5c8; border-radius: 0px; }
+    .mode-card { background: transparent; border: 2px solid #e6dfd8; border-radius: 0px; padding: 16px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; width: 200px; font-family: -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+    .mode-card:hover { border-color: #c9bab0; background: #f5efe8; }
+    .mode-card.active { border: 2px solid #D6643E; box-shadow: none; }
+    .mode-card-top { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+    .mode-color-swatch { width: 40px; height: 40px; border-radius: 0px; border: 1px solid #e0d5c8; flex-shrink: 0; }
+    .mode-card-info h3 { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.875rem; font-weight: 700; margin-bottom: 4px; color: #2d2a26; }
+    .mode-card-info .hex { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.75rem; color: #9a8b7a; }
+    .mode-card-description { font-size: 12px; color: #6c6a64; line-height: 1.4; }
+    .mode-card-bottom { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .severity-tag { padding: 4px 8px; border-radius: 0px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.75rem; font-weight: 600; }
+    .severity-normal { background: #d1fae5; color: #10b981; }
+    .severity-partial { background: #fef3c7; color: #f59e0b; }
+    .severity-full { background: #fee2e2; color: #ef4444; }
+    .prevalence-text { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.75rem; color: #9a8b7a; }
+    .comparison-section { background: transparent; border: none; border-radius: 0; padding: 0; }
+    .comparison-label { font-family: -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 0.875rem; font-weight: 700; margin-bottom: 16px; color: #3d3d3a; }
+    .comparison-grid { display: flex; gap: 16px; }
+    .comparison-box { border: 1px solid #e0d5c8; border-radius: 0px; overflow: hidden; flex: 1; }
+    .comparison-box-label { padding: 10px 14px; background: #f5efe8; border-bottom: 1px solid #e0d5c8; font-family: -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700; color: #2d2a26; }
+    .type-prevalence { color: #9a8b7a; font-weight: 400; }
+    .comparison-color { height: 128px; display: flex; align-items: center; justify-content: center; }
+    .comparison-hex { padding: 10px 14px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.875rem; color: #7a6a55; border-top: 1px solid #e0d5c8; text-align: center; }
+    
+    /* 导出报告按钮样式 */
+    .export-section { margin-top: 20px; text-align: left; }
+    .export-button { 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center;
+      gap: 8px; 
+      padding: 0 24px; 
+      height: 44px;
+      width: 560px;
+      background: linear-gradient(135deg, #D6643E 0%, #c96442 100%); 
+      color: white; 
+      border: none; 
+      border-radius: 0px; 
+      font-size: 14px; 
+      font-weight: 600; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+      white-space: nowrap;
+    }
+    .export-button:disabled { 
+      opacity: 0.5; 
+      cursor: not-allowed; 
+    }
+    .export-button:hover { 
+      background: linear-gradient(135deg, #a9583e 0%, #a04830 100%); 
+    }
+    
+    /* 保留原有样式作为备用 */
+    .color-swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+    .color-swatch { aspect-ratio: 1; border-radius: 0px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.2s ease; }
+    .color-swatch:hover { transform: scale(1.05); }
+    
+    /* 对比度检查器样式 */
+    .contrast-container { padding: 0; }
+    .contrast-colors-section { display: flex; gap: 16px; margin-bottom: 24px; }
+    .color-picker-group { flex: 1; }
+    .color-picker-label { display: block; font-family: -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 0.875rem; font-weight: 700; color: #3d3d3a; margin-bottom: 16px; }
+    #bg-color-picker, #fg-color-picker { width: 48px; height: 48px; border-radius: 0px; border: 1px solid #e0d5c8; cursor: pointer; padding: 0; }
+    #bg-color-picker::-webkit-color-swatch-wrapper, #fg-color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+    #bg-color-picker::-webkit-color-swatch, #fg-color-picker::-webkit-color-swatch { border: none; border-radius: 0px; }
+    #bg-hex-input, #fg-hex-input { flex: 1; padding: 0 16px; border-radius: 0px; border: 1px solid #e0d5c8; background: transparent; color: #2d2a26; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 13px; font-weight: 600; height: 48px; }
+    #bg-hex-input:focus, #fg-hex-input:focus { outline: none; border-color: #D6643E; box-shadow: 0 0 0 3px #ffe8db; }
+    .contrast-actions { margin-bottom: 24px; }
+    .contrast-action-btn { padding: 10px 20px; border-radius: 0px; border: 2px solid #e0d5c8; background: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; color: #3d3d3a; }
+    .contrast-action-btn:hover { border-color: #D6643E; background: #fff5ef; }
+    .contrast-preview-section, .contrast-results-section { margin-bottom: 24px; }
+    .contrast-section-label { display: block; font-family: -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 0.875rem; font-weight: 700; color: #3d3d3a; margin-bottom: 16px; }
+    .contrast-preview-box { border: 1px solid #e0d5c8; border-radius: 0px; padding: 24px; background: #1a1a2e; }
+    .preview-large-text { font-size: 24px; font-weight: 700; margin: 0 0 16px 0; color: #eaeaea; }
+    .preview-normal-text { font-size: 16px; margin: 0 0 12px 0; color: #eaeaea; }
+    .preview-small-text { font-size: 14px; margin: 0 0 12px 0; color: #eaeaea; }
+    .preview-tiny-text { font-size: 12px; margin: 0; color: #eaeaea; }
+    .contrast-ratio-display { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #f5efe8; border-radius: 0px; margin-bottom: 16px; }
+    .ratio-label { font-family: -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 0.875rem; font-weight: 700; color: #3d3d3a; }
+    .ratio-value { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 1.5rem; font-weight: 800; color: #D6643E; }
+    .compliance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .compliance-item { display: flex; gap: 12px; padding: 16px; background: #F5F0E8; border: none; border-radius: 0px; }
+    .compliance-status { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 0px; font-size: 18px; font-weight: 700; flex-shrink: 0; }
+    .compliance-status.pass { background: #d1fae5; color: #10b981; }
+    .compliance-status.fail { background: #fee2e2; color: #ef4444; }
+    .compliance-text { flex: 1; }
+    .compliance-title { font-size: 14px; font-weight: 700; color: #2d2a26; margin-bottom: 4px; }
+    .compliance-detail { font-size: 12px; color: #7a6a55; }
+  </style>
+</head>
+<body>
+  <!-- MAIN PAGE -->
+  <div class="page active" id="main-page">
+    <div class="main-header">
+      <div class="header-top">
+        <div class="header-left">
+          <h1 id="page-title">Color Vision Tester 🚥</h1>
+        </div>
+        <div class="lang-switcher" aria-label="Language switcher">
+          <button class="lang-option active" id="lang-en-btn" type="button">EN</button>
+          <button class="lang-option" id="lang-zh-btn" type="button">中文</button>
+        </div>
+      </div>
+      <!-- 主菜单 -->
+      <div class="main-menu">
+        <button class="menu-tab active" data-tab="image">
+          <svg width="16" height="16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M86.6345 66.8366V23.6995H13.342V61.0615L37.2074 40.7847L60.9209 64.3069L73.6037 52.5409L86.6296 66.8366H86.6345ZM93.9883 16.3457V82.3138H5.98828V16.3457H93.9883Z"/>
+          </svg>
+          <span id="tab-label-image">Image Mode</span></button>
+        <button class="menu-tab" data-tab="color">
+          <svg width="16" height="16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M69.729 36.3244C71.575 32.1614 72.0565 27.521 71.1047 23.0677C70.1528 18.6143 67.8164 14.5762 64.4299 11.5316C61.0434 8.4869 56.7804 6.59174 52.2512 6.1174C47.722 5.64305 43.1588 6.61383 39.215 8.89078C35.2711 11.1677 32.1487 14.6341 30.2949 18.7936C28.441 22.9531 27.9506 27.5926 28.8941 32.0477C29.8375 36.5029 32.1662 40.5454 35.547 43.5965C38.9278 46.6475 43.1872 48.5508 47.7154 49.0337C50.2392 45.4423 53.5159 42.4446 57.3171 40.2496C61.1184 38.0545 65.3526 36.715 69.7247 36.3244H69.729ZM54.9785 79.1345C56.8281 75.1513 57.7863 70.8126 57.7863 66.4209C57.7863 62.0293 56.8281 57.6906 54.9785 53.7074C57.6611 50.0277 61.4391 47.291 65.7717 45.8891C70.1043 44.4872 74.7693 44.4919 79.0991 45.9026C83.4288 47.3134 87.2012 50.0577 89.8764 53.7429C92.5515 57.428 93.9922 61.865 93.9922 66.4188C93.9922 70.9725 92.5515 75.4096 89.8764 79.0947C87.2012 82.7799 83.4288 85.5242 79.0991 86.9349C74.7693 88.3456 70.1043 88.3504 65.7717 86.9485C61.4391 85.5466 57.6611 82.8099 54.9785 79.1302V79.1345ZM25.2876 44.9555C27.8112 48.5475 31.0877 51.5458 34.8889 53.7416C38.6901 55.9374 42.9245 57.2776 47.2968 57.669C49.1421 61.8325 49.6228 66.473 48.67 70.9263C47.7173 75.3796 45.38 79.4172 41.9928 82.4612C38.6055 85.5053 34.3421 87.3995 29.8127 87.8729C25.2833 88.3462 20.7203 87.3744 16.7769 85.0965C12.8335 82.8186 9.71186 79.3514 7.85896 75.1914C6.00606 71.0313 5.51687 66.3917 6.46143 61.9367C7.40599 57.4817 9.73586 53.4397 13.1175 50.3895C16.4991 47.3393 20.7591 45.4372 25.2876 44.9555Z"/>
+          </svg>
+          <span id="tab-label-color">Color Mode</span>
+        </button>
+        <button class="menu-tab" data-tab="contrast">
+          <svg width="16" height="16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50.0039 92C26.8073 92 8.00391 73.1966 8.00391 50C8.00391 26.8034 26.8073 8 50.0039 8C73.2005 8 92.0039 26.8034 92.0039 50C92.0039 73.1966 73.2005 92 50.0039 92ZM50.0039 83.6V16.4C41.0926 16.4 32.5463 19.94 26.2451 26.2412C19.9439 32.5424 16.4039 41.0887 16.4039 50C16.4039 58.9113 19.9439 67.4576 26.2451 73.7588C32.5463 80.06 41.0926 83.6 50.0039 83.6Z"/>
+          </svg>
+          <span id="tab-label-contrast">Contrast</span>
+        </button>
+        <button class="menu-tab" data-tab="games">
+          <svg width="16" height="16" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50.7646 7.71094C63.248 7.71094 75.9019 14.4895 82.1885 21.749L82.1436 21.792C82.4553 21.9158 84.2443 24.9087 82.4141 26.7939L58.0312 52.6787L81.1504 76.3564C82.4294 78.3187 80.6156 79.879 79.8105 80.7812C72.2274 87.9526 62.0247 92.375 50.7646 92.375C27.3873 92.3748 8.43377 73.4205 8.43359 50.0449C8.43359 26.6646 27.3872 7.71115 50.7646 7.71094ZM84.4961 44.3115C88.8828 44.3115 92.4336 47.8688 92.4336 52.249C92.4335 56.631 88.8827 60.1855 84.4961 60.1855C80.1104 60.1855 76.5597 56.631 76.5596 52.249C76.5596 47.8688 80.1104 44.3116 84.4961 44.3115ZM29.4365 34.0791V39.3896H29.5469V34.0791H29.4365ZM34.9268 34.0781H34.8896V28.876H34.9268V34.0781ZM34.8916 34.1699H29.5996V39.3887H34.9258V44.751H34.8896V39.46H34.8184V44.9863H40.0566V44.9854H34.9277V44.75H40.0566V39.3896H40.165V39.3887H45.4375V34.1699H40.1826V34.0791H40.0566V28.876H34.9277V28.8408H34.8184V34.0791H34.8916V34.1699Z"/>
+          </svg>
+          <span id="tab-label-games">Self-test</span>
+        </button>
+      </div>
+    </div>
+    
+    <p class="subtitle" id="subtitle">Image Mode: select any image or frame in Figma to preview the effect.</p>
+    
+    <!-- 图像模式内容 -->
+    <div id="image-content">
+      <div class="type-selector" id="type-selector">
+        <button class="type-btn active" data-type="protanopia">Protanopia</button>
+        <button class="type-btn" data-type="deuteranopia">Deuteranopia</button>
+        <button class="type-btn" data-type="tritanopia">Tritanopia</button>
+        <button class="type-btn" data-type="protanomaly">Protanomaly</button>
+        <button class="type-btn" data-type="deuteranomaly">Deuteranomaly</button>
+        <button class="type-btn" data-type="tritanomaly">Tritanomaly</button>
+      </div>
+      
+      <div class="preview-container">
+        <div class="preview-box">
+          <div class="preview-label">Original (Typical Vision)</div>
+          <div class="preview-content">
+            <canvas id="original-canvas"></canvas>
+            <div class="placeholder-text" id="original-placeholder">Select a node in Figma</div>
+          </div>
+        </div>
+        <div class="preview-box">
+          <div class="preview-label" id="simulated-label">
+            <span class="type-name">Protanopia</span>
+            <span class="type-prevalence" id="image-simulated-prevalence" style="margin-left: 4px;"></span>
+          </div>
+          <div class="preview-content">
+            <canvas id="simulated-canvas"></canvas>
+            <div class="placeholder-text" id="simulated-placeholder">Select a node in Figma</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="export-section">
+        <button class="export-button" id="export-report-btn">
+          Export Report to Canvas
+        </button>
+      </div>
+      
+      <div class="info-box">
+        <p><strong>💡 Design Tip:</strong></p>
+        <p>Color vision deficiencies affect about 8% of men and 0.5% of women. Keep contrast strong, avoid relying on color alone to communicate meaning, and add patterns, labels, or icons when helpful.</p>
+      </div>
+    </div>
+    
+    <!-- 颜色模式内容 -->
+    <div id="color-content" class="hidden">
+      <div class="color-mode-container">
+        <div class="select-color-section">
+          <label class="select-color-label">选择颜色</label>
+          <div class="color-input-wrapper">
+            <input type="color" id="color-picker" value="#d6643e">
+            <input type="text" id="hex-input" value="#d6643e">
+          </div>
+        </div>
+        
+        <div class="mode-cards-grid" id="mode-cards-grid">
+          <!-- 卡片由 JavaScript 动态生成 -->
+        </div>
+        
+        <div class="comparison-section">
+          <div class="comparison-label">对比效果</div>
+          <div class="comparison-grid">
+            <div class="comparison-box">
+              <div class="comparison-box-label">所选颜色</div>
+              <div class="comparison-color" id="original-color"></div>
+              <div class="comparison-hex" id="original-hex"></div>
+            </div>
+            <div class="comparison-box">
+              <div class="comparison-box-label" id="simulated-type-label">
+                <span class="type-name">Normal</span>
+                <span class="type-prevalence" id="simulated-prevalence" style="margin-left: 4px;"></span>
+              </div>
+              <div class="comparison-color" id="simulated-color"></div>
+              <div class="comparison-hex" id="simulated-hex"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 游戏测试内容 -->
+    <div id="games-content" class="hidden">
+      <div class="game-grid">
+        <div class="game-card" id="game1-card">
+          <div class="game-icon">🔢</div>
+          <h3>找数字色盲测试</h3>
+          <p>经典Ishihara色板测试，11道标准题目，科学分析结果。</p>
+        </div>
+        <div class="game-card" id="game2-card">
+          <div class="game-icon">🎯</div>
+          <h3>找色差挑战</h3>
+          <p>在色块中找出不同的那一个，60秒限时挑战，看看你能得多少分！</p>
+        </div>
+        <div class="game-card" id="game3-card">
+          <div class="game-icon">🧩</div>
+          <h3>马赛克色觉阈值测试</h3>
+          <p>在动态马赛克中找出目标色块，测试你的色觉敏锐度极限。</p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 对比度检查器内容 -->
+    <div id="contrast-content" class="hidden">
+      <div class="contrast-container">
+        <div class="contrast-colors-section">
+          <div class="color-picker-group">
+            <label class="color-picker-label">背景颜色</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="bg-color-picker" value="#000000">
+              <input type="text" id="bg-hex-input" value="#000000">
+            </div>
+          </div>
+          <div class="color-picker-group">
+            <label class="color-picker-label">前景颜色</label>
+            <div class="color-input-wrapper">
+              <input type="color" id="fg-color-picker" value="#ffffff">
+              <input type="text" id="fg-hex-input" value="#ffffff">
+            </div>
+          </div>
+        </div>
+        
+
+        
+        <div class="contrast-preview-section">
+          <label class="contrast-section-label">预览</label>
+          <div class="contrast-preview-box" id="contrast-preview">
+            <p class="preview-large-text">大文字 (24px+)</p>
+            <p class="preview-normal-text">正常文字在16px。用于常规标题和正文信息</p>
+            <p class="preview-small-text">小文字在14px，用于大篇幅正文和说明文字</p>
+            <p class="preview-tiny-text">小于14px字号，建议仅用作弱提示文案</p>
+          </div>
+        </div>
+        
+        <div class="contrast-results-section">
+          <label class="contrast-section-label">WCAG 2.1 合规性</label>
+          <div class="contrast-ratio-display" id="contrast-ratio">
+            <span class="ratio-label">对比度</span>
+            <span class="ratio-value" id="ratio-value">21:1</span>
+          </div>
+          <div class="compliance-grid">
+            <div class="compliance-item" id="aa-normal">
+              <div class="compliance-status pass" id="aa-normal-status">✓</div>
+              <div class="compliance-text">
+                <div class="compliance-title">AA 正常</div>
+                <div class="compliance-detail">4.5:1 最小（小于18pt 或 14pt粗体）</div>
+              </div>
+            </div>
+            <div class="compliance-item" id="aa-large">
+              <div class="compliance-status pass" id="aa-large-status">✓</div>
+              <div class="compliance-text">
+                <div class="compliance-title">AA 大文字</div>
+                <div class="compliance-detail">3:1 最小（18pt+ 或 14pt+粗体）</div>
+              </div>
+            </div>
+            <div class="compliance-item" id="aaa-normal">
+              <div class="compliance-status pass" id="aaa-normal-status">✓</div>
+              <div class="compliance-text">
+                <div class="compliance-title">AAA 正常</div>
+                <div class="compliance-detail">7:1 最小（增强可访问性）</div>
+              </div>
+            </div>
+            <div class="compliance-item" id="aaa-large">
+              <div class="compliance-status pass" id="aaa-large-status">✓</div>
+              <div class="compliance-text">
+                <div class="compliance-title">AAA 大文字</div>
+                <div class="compliance-detail">4.5:1 最小（大文字增强可访问性）</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+      <div class="info-box">
+        <p><strong>WCAG 2.1 的 AA 和 AAA 标准说明</strong></p>
+        <p><strong>AA 级 (国际主流标准)：</strong>行业最常用的标准，它解决了大多数残障人士在使用网络产品时遇到的问题。</p>
+        <p><strong>AAA 级 (最高标准)：</strong> 最严格、最全面，很难在所有类型的网站实现，但在公共服务或特定需要网站需尽力满足。</p>
+      </div>
+      
+      </div>
+    </div>
+  </div>
+  
+  <!-- GAME 1: ISHIHARA -->
+  <div class="page" id="ishihara-page">
+    <div class="nav-bar">
+      <button class="back-btn" id="ishihara-back">
+          <svg width="16" height="16" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M625.615238 769.462857L368.152381 512l257.462857-257.462857 34.499048 34.499047L437.150476 512l222.96381 222.96381-34.499048 34.499047z" fill="#3d3d3a"></path>
+          </svg>
+          <span class="back-btn-text">Back</span>
+        </button>
+    </div>
+    
+    <!-- LANDING -->
+    <div id="ishihara-landing">
+      <div class="card">
+        <div class="landing-icon">🔢</div>
+        <div class="landing-title">找数字色盲测试</div>
+        <div class="landing-desc">这是基于Ishihara色板的色觉测试。请在每一张色板中找出你看到的数字。</div>
+        
+        <div class="feature-list">
+          <div class="feature-item"><div class="feature-icon">✓</div>11道标准测试题目</div>
+          <div class="feature-item"><div class="feature-icon">✓</div>科学的结果分析</div>
+        </div>
+        
+        <div style="text-align: center;">
+          <button class="btn btn-primary" style="padding: 16px 48px; font-size: 18px;" id="ishihara-start">开始测试</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- TESTING -->
+    <div id="ishihara-testing" class="hidden">
+      <div class="card">
+        <div class="ishihara-progress">
+          <div class="progress-text" id="ishihara-progress-text">1 / 38</div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="ishihara-progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+        
+        <div class="plate-container">
+          <div class="plate-placeholder" id="plate-display">🎨</div>
+        </div>
+        
+        <div class="answer-display" id="answer-display">_</div>
+        
+        <div class="numpad">
+          <button class="num-btn" data-num="1">1</button>
+          <button class="num-btn" data-num="2">2</button>
+          <button class="num-btn" data-num="3">3</button>
+          <button class="num-btn" data-num="4">4</button>
+          <button class="num-btn" data-num="5">5</button>
+          <button class="num-btn" data-num="6">6</button>
+          <button class="num-btn" data-num="7">7</button>
+          <button class="num-btn" data-num="8">8</button>
+          <button class="num-btn" data-num="9">9</button>
+          <button class="num-btn" data-num="clear">C</button>
+          <button class="num-btn" data-num="0">0</button>
+          <button class="num-btn" data-num="next">→</button>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="btn btn-small btn-nothing" id="btn-nothing">看不到任何东西</button>
+          <button class="btn btn-small btn-skip" id="btn-skip">跳过</button>
+        </div>
+        
+        <div class="shortcut-hint">
+          ⌨️ 快捷键：数字键输入 | Backspace清除 | Enter下一题
+        </div>
+      </div>
+    </div>
+    
+    <!-- ANALYZING -->
+    <div id="ishihara-analyzing" class="hidden">
+      <div class="card">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div style="font-size: 48px;">🔍</div>
+          <h3 style="font-size: 20px; font-weight: 700;">正在分析测试结果</h3>
+        </div>
+        <div class="analyzing-steps">
+          <div class="step" id="step-1">
+            <div class="step-icon">1</div>
+            <div class="step-text">分析作答记录</div>
+          </div>
+          <div class="step" id="step-2">
+            <div class="step-icon">2</div>
+            <div class="step-text">生成测试报告</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- RESULT -->
+    <div id="ishihara-result" class="hidden">
+      <div class="card">
+        <div class="result-header">
+          <div class="result-icon" id="result-icon">🎉</div>
+          <div class="result-title" id="result-title">色觉正常</div>
+          <div class="result-score" id="result-score">35 / 38</div>
+        </div>
+        
+        <div class="result-detail">
+          <h4>📋 测试分析</h4>
+          <p id="result-desc">你的测试结果表明你的色觉是正常的。你能够很好地分辨各种颜色。</p>
+        </div>
+        
+        <div class="disclaimer">
+          ⚠️ 免责声明：本测试仅供科普参考，不能替代专业医疗诊断。如有疑虑请咨询眼科医生。
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn btn-secondary" id="ishihara-restart" style="flex: 1;">重新测试</button>
+          <button class="btn btn-primary" id="ishihara-exit" style="flex: 1;">返回首页</button>
+        </div>
+      
+      </div>
+    </div>
+  </div>
+  
+  <!-- GAME 2: COLOR DIFF -->
+  <div class="page" id="colordiff-page">
+    <div class="nav-bar">
+      <button class="back-btn" id="colordiff-back">
+          <svg width="16" height="16" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M625.615238 769.462857L368.152381 512l257.462857-257.462857 34.499048 34.499047L437.150476 512l222.96381 222.96381-34.499048 34.499047z" fill="#3d3d3a"></path>
+          </svg>
+          <span class="back-btn-text">Back</span>
+        </button>
+    </div>
+    
+    <!-- LANDING -->
+    <div id="colordiff-landing">
+      <div class="card">
+        <div class="landing-icon">🎯</div>
+        <div class="landing-title">找色差挑战</div>
+        <div class="landing-desc">在多个相同颜色的色块中，找出那一个颜色略有不同的方块。限时60秒，看看你能得多少分！</div>
+        
+        <div class="difficulty-selector" id="diff-selector">
+          <button class="diff-btn active" data-diff="easy">初级</button>
+          <button class="diff-btn" data-diff="normal">中级</button>
+          <button class="diff-btn" data-diff="hard">高级</button>
+        </div>
+        
+        <div id="game2-highscore" class="highscore-box hidden">
+          <div class="label">🏆 历史最高分</div>
+          <div class="value" id="highscore-value">0</div>
+        </div>
+        
+        <div style="text-align: center;">
+          <button class="btn btn-primary" style="padding: 16px 48px; font-size: 18px;" id="colordiff-start">开始游戏</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- PLAYING -->
+    <div id="colordiff-playing" class="hidden">
+      <div class="card">
+        <div class="game2-header">
+          <div class="stat-box">
+            <div class="stat-label">关卡</div>
+            <div class="stat-value" id="g2-level">1</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">得分</div>
+            <div class="stat-value" id="g2-score">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">时间</div>
+            <div class="stat-value timer" id="g2-timer">60</div>
+          </div>
+        </div>
+        
+        <div class="grid-container2" id="g2-grid-container">
+          <div class="color-grid" id="g2-grid"></div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 16px;">
+          <button class="btn btn-small btn-secondary" id="g2-pause">暂停</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- RESULT -->
+    <div id="colordiff-result" class="hidden">
+      <div class="card game2-result">
+        <h2>⏰ 时间到！</h2>
+        <div class="score-big" id="g2-final-score">0</div>
+        
+        <div id="g2-new-record" class="title-badge hidden">🎉 新纪录！</div>
+        
+        <div class="result-stats">
+          <div class="stat-card">
+            <div class="num" id="g2-levels">0</div>
+            <div class="label">通过关卡</div>
+          </div>
+          <div class="stat-card">
+            <div class="num" id="g2-correct">0</div>
+            <div class="label">正确点击</div>
+          </div>
+          <div class="stat-card">
+            <div class="num" id="g2-wrong">0</div>
+            <div class="label">错误点击</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn btn-secondary" id="g2-play-again" style="flex: 1;">再玩一次</button>
+          <button class="btn btn-primary" id="g2-exit" style="flex: 1;">返回首页</button>
+        </div>
+      
+      </div>
+    </div>
+  </div>
+  
+  <!-- GAME 3: MOSAIC (COLORLITE MOSAIC TEST) -->
+  <div class="page" id="mosaic-page">
+    <div class="nav-bar">
+      <button class="back-btn" id="mosaic-back">
+          <svg width="16" height="16" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M625.615238 769.462857L368.152381 512l257.462857-257.462857 34.499048 34.499047L437.150476 512l222.96381 222.96381-34.499048 34.499047z" fill="#3d3d3a"></path>
+          </svg>
+          <span class="back-btn-text">Back</span>
+        </button>
+    </div>
+    
+    <!-- LANDING -->
+    <div id="mosaic-landing">
+      <div class="card">
+        <div class="landing-icon">🧩</div>
+        <div class="landing-title">马赛克色觉测试</div>
+        <div class="landing-desc">在动态马赛克中找出目标色块，测试你的色觉敏锐度极限，为你分析有什么类型的色觉障碍。</div>
+        
+        <div style="text-align: center;">
+          <button class="btn btn-primary" style="padding: 16px 48px; font-size: 18px;" id="mosaic-start">开始测试</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- MAIN TEST VIEW -->
+    <div id="mosaic-test-view" class="hidden">
+      <div class="card">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h2 style="font-size: 20px; font-weight: 700; margin: 0;">马赛克色觉测试</h2>
+        </div>
+        
+        <div style="display: flex; justify-content: space-around; margin-bottom: 16px; font-size: 14px;">
+          <div><span id="mosaic-axis-label-1">Red-Green Vision</span>: <span id="p1" style="font-weight: 700; color: #18a0fb;">0%</span></div>
+          <div><span id="mosaic-axis-label-2">Purple-Blue Vision</span>: <span id="p2" style="font-weight: 700; color: #18a0fb;">0%</span></div>
+          <div><span id="mosaic-axis-label-3">Purple-Green Vision</span>: <span id="p3" style="font-weight: 700; color: #18a0fb;">0%</span></div>
+        </div>
+        
+        <p id="komment" style="text-align: center; color: #666; font-size: 14px; margin-bottom: 16px;">点击马赛克中的小方块！</p>
+        
+        <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+          <canvas id="mosaic-canvas" class="bars" style="background: #000;"></canvas>
+        </div>
+        
+        <div style="display: flex; gap: 10px; justify-content: center;">
+          <button class="btn btn-ghost" id="btn-idk">我看不到</button>
+          <button class="btn btn-secondary" id="btn-restart">重新开始</button>
+          <button class="btn btn-primary" id="btn-exit">退出</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- RESULT VIEW -->
+    <div id="mosaic-result-view" class="hidden">
+      <div class="card">
+        <div style="text-align: center;">
+          <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;" id="diagnosis-title">诊断结果</h2>
+          <p style="font-size: 18px; font-weight: 600; color: #18a0fb; margin-bottom: 20px;" id="diagnosis-text">结果正常</p>
+          
+          <div style="margin-bottom: 20px;">
+            <p style="font-size: 14px; color: #666;"><span id="mosaic-result-axis-label-1">Red-Green Vision</span>: <span id="rp1">0%</span></p>
+            <p style="font-size: 14px; color: #666;"><span id="mosaic-result-axis-label-2">Purple-Blue Vision</span>: <span id="rp2">0%</span></p>
+            <p style="font-size: 14px; color: #666;"><span id="mosaic-result-axis-label-3">Purple-Green Vision</span>: <span id="rp3">0%</span></p>
+          </div>
+          
+          <div class="disclaimer">
+            ⚠️ 免责声明：本测试仅供科普参考，不能替代专业医疗诊断。如有疑虑请咨询眼科医生。
+          </div>
+          
+          <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <button class="btn btn-secondary" id="btn-restart2" style="flex: 1;">重新开始</button>
+            <button class="btn btn-primary" id="btn-back" style="flex: 1;">返回首页</button>
+          </div>
+        </div>
+      
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    // ==================== COLOR BLIND SIMULATION ====================
+    const ColorBlindMatrix = {
+      normal: [1, 0, 0, 0, 1, 0, 0, 0, 1],
+      
+      // 红色盲 - 标准矩阵 (来自公认的色盲模拟算法)
+      protanopia: [
+        0.56667, 0.43333, 0.00000,
+        0.55833, 0.44167, 0.00000,
+        0.00000, 0.24167, 0.75833
+      ],
+      
+      // 绿色盲 - 标准矩阵 (来自公认的色盲模拟算法)
+      deuteranopia: [
+        0.62500, 0.37500, 0.00000,
+        0.70000, 0.30000, 0.00000,
+        0.00000, 0.30000, 0.70000
+      ],
+      
+      // 蓝色盲 - 改进的矩阵
+      tritanopia: [
+        0.95000, 0.05000, 0.00000,
+        0.00000, 0.43333, 0.56667,
+        0.00000, 0.47500, 0.52500
+      ],
+      
+      // 红色弱 - 改进的混合矩阵 (约50%正常 + 50%色盲)
+      protanomaly: [
+        0.80667, 0.19333, 0.00000,
+        0.32500, 0.67500, 0.00000,
+        0.00000, 0.14167, 0.85833
+      ],
+      
+      // 绿色弱 - 改进的混合矩阵 (约50%正常 + 50%色盲)
+      deuteranomaly: [
+        0.77500, 0.22500, 0.00000,
+        0.27500, 0.72500, 0.00000,
+        0.00000, 0.19167, 0.80833
+      ],
+      
+      // 蓝色弱 - 改进的混合矩阵 (约50%正常 + 50%色盲)
+      tritanomaly: [
+        0.95833, 0.04167, 0.00000,
+        0.00000, 0.75833, 0.24167,
+        0.00000, 0.21667, 0.78333
+      ],
+      
+      achromatopsia: [0.299, 0.587, 0.114, 0.299, 0.587, 0.114, 0.299, 0.587, 0.114],
+      achromatomaly: [0.618, 0.32, 0.062, 0.163, 0.775, 0.062, 0.163, 0.32, 0.516]
+    };
+    
+    const CVD_TYPE_KEYS = ['normal', 'protanopia', 'deuteranopia', 'tritanopia', 'protanomaly', 'deuteranomaly', 'tritanomaly'];
+    let currentLanguage = 'en';
+
+    const I18N = {
+      en: {
+        title: 'Color Vision Tester 🚥',
+        toggle: 'EN/中文',
+        tabs: {
+          image: 'Image Mode',
+          color: 'Color Mode',
+          contrast: 'Contrast',
+          games: 'Self-test'
+        },
+        subtitles: {
+          image: 'Image Mode: select any image or frame in Figma to preview the effect.',
+          color: 'Color Mode: choose or enter any color to preview the effect.',
+          games: 'Self-test: use classic mini games to explore whether you may have a color vision deficiency.',
+          contrast: 'Contrast: check whether your color contrast meets WCAG accessibility guidelines.'
+        },
+        common: {
+          back: 'Back',
+          backHome: 'Back to Home',
+          disclaimer: '⚠️ Disclaimer: This test is for educational reference only and does not replace a professional medical diagnosis. Please consult an eye specialist if you have concerns.'
+        },
+        image: {
+          originalPreview: 'Original (Typical Vision)',
+          placeholder: 'Select a node in Figma',
+          export: 'Export Report to Canvas',
+          tipTitle: '💡 Design Tip:',
+          tipBody: 'Color vision deficiencies affect about 8% of men and 0.5% of women. Keep contrast strong, avoid relying on color alone to communicate meaning, and add patterns, labels, or icons when helpful.'
+        },
+        color: {
+          selectColor: 'Pick a Color',
+          comparison: 'Comparison',
+          selectedColor: 'Selected Color'
+        },
+        games: {
+          card1Title: 'Number Plate Test',
+          card1Desc: 'Classic Ishihara plates with 11 standard questions and science-based analysis.',
+          card2Title: 'Color Difference Challenge',
+          card2Desc: 'Find the one tile with a slightly different color in 60 seconds and see how high you can score.',
+          card3Title: 'Mosaic Vision Test',
+          card3Desc: 'Find the target tile in a dynamic mosaic and test the limits of your color sensitivity.'
+        },
+        contrast: {
+          bgColor: 'Background Color',
+          fgColor: 'Foreground Color',
+          preview: 'Preview',
+          largeText: 'Large text (24px+)',
+          normalText: 'Normal text at 16px. Suitable for common headings and body copy.',
+          smallText: 'Small text at 14px. Suitable for dense content and helper text.',
+          tinyText: 'Below 14px is best reserved for low-emphasis microcopy.',
+          compliance: 'WCAG 2.1 Compliance',
+          contrastRatio: 'Contrast Ratio',
+          aaNormalTitle: 'AA Normal',
+          aaNormalDetail: 'Minimum 4.5:1 (below 18pt or 14pt bold)',
+          aaLargeTitle: 'AA Large Text',
+          aaLargeDetail: 'Minimum 3:1 (18pt+ or 14pt+ bold)',
+          aaaNormalTitle: 'AAA Normal',
+          aaaNormalDetail: 'Minimum 7:1 (enhanced accessibility)',
+          aaaLargeTitle: 'AAA Large Text',
+          aaaLargeDetail: 'Minimum 4.5:1 (enhanced large-text accessibility)',
+          infoTitle: 'About WCAG 2.1 AA and AAA',
+          infoAA: 'AA is the most common industry baseline and addresses the majority of accessibility issues users encounter in digital products.',
+          infoAAA: 'AAA is the strictest target. It is hard to meet everywhere, but public-service and high-need experiences should aim for it whenever possible.'
+        },
+        ishihara: {
+          landingTitle: 'Number Plate Test',
+          landingDesc: 'This Ishihara-based vision test asks you to identify the number visible on each plate.',
+          feature1: '11 standard test questions',
+          feature2: 'Science-based result analysis',
+          start: 'Start Test',
+          seeNothing: 'I can’t see anything',
+          skip: 'Skip',
+          shortcut: '⌨️ Shortcuts: number keys | Backspace clear | Enter next',
+          analyzingTitle: 'Analyzing your results',
+          step1: 'Reviewing your answers',
+          step2: 'Generating your report',
+          resultHeading: '📋 Test Analysis',
+          restart: 'Test Again',
+          states: {
+            normal: {
+              title: 'Typical Color Vision',
+              desc: 'Your result suggests typical color vision. You can distinguish colors well, including subtle differences between reds and greens.'
+            },
+            mild: {
+              title: 'Mild Color Vision Deficiency',
+              desc: 'Your result suggests a possible mild color vision deficiency. Take extra care in jobs or tasks that require precise color recognition.'
+            },
+            moderate: {
+              title: 'Moderate Color Vision Deficiency',
+              desc: 'Your result suggests a possible moderate color vision deficiency. Consider a professional eye exam, especially if accurate color judgment matters in your work.'
+            },
+            severe: {
+              title: 'Severe Color Vision Deficiency',
+              desc: 'Your result suggests a possible severe color vision deficiency. A comprehensive professional eye exam is strongly recommended to confirm the type and severity.'
+            }
+          }
+        },
+        colorDiff: {
+          landingTitle: 'Color Difference Challenge',
+          landingDesc: 'Find the one tile with a slightly different color among the rest. You have 60 seconds. See how high you can score!',
+          easy: 'Easy',
+          normal: 'Normal',
+          hard: 'Hard',
+          bestScore: '🏆 Best Score',
+          start: 'Start Game',
+          level: 'Level',
+          score: 'Score',
+          time: 'Time',
+          pause: 'Pause',
+          resume: 'Resume',
+          timeUp: '⏰ Time’s Up!',
+          newRecord: '🎉 New Record!',
+          cleared: 'Levels Cleared',
+          correct: 'Correct Clicks',
+          wrong: 'Wrong Clicks',
+          playAgain: 'Play Again'
+        },
+        mosaic: {
+          landingTitle: 'Mosaic Vision Test',
+          landingDesc: 'Find the target tile in the dynamic mosaic to test the limits of your color sensitivity and estimate what type of color vision deficiency may be present.',
+          start: 'Start Test',
+          mainTitle: 'Mosaic Vision Test',
+          axis1: 'Red-Green Vision',
+          axis2: 'Purple-Blue Vision',
+          axis3: 'Purple-Green Vision',
+          hint: 'Click the small square inside the mosaic!',
+          cantSee: 'I can’t see it',
+          restart: 'Restart',
+          exit: 'Exit',
+          diagnosisTitle: 'Diagnosis',
+          diagnosisNormal: 'Typical result',
+          mild: 'Mild',
+          moderate: 'Moderate',
+          severe: 'Severe',
+          deficiencySuffix: ' color vision deficiency',
+          resultTitle: 'Typical result'
+        },
+        types: {
+          normal: { name: 'Normal', description: 'Full color vision', prevalence: 'About 92% of people' },
+          protanopia: { name: 'Protanopia', description: 'Reduced sensitivity to red, often appears darker', prevalence: 'About 1% of men' },
+          deuteranopia: { name: 'Deuteranopia', description: 'Reduced sensitivity to green, a common type', prevalence: 'About 1% of men' },
+          tritanopia: { name: 'Tritanopia', description: 'Reduced sensitivity to blue, relatively rare', prevalence: 'Less than 0.01%' },
+          protanomaly: { name: 'Protanomaly', description: 'Reduced red sensitivity', prevalence: 'About 1% of men' },
+          deuteranomaly: { name: 'Deuteranomaly', description: 'Reduced green sensitivity, relatively common', prevalence: 'About 5% of men' },
+          tritanomaly: { name: 'Tritanomaly', description: 'Reduced blue sensitivity', prevalence: 'Less than 0.01%' }
+        }
+      },
+      zh: {
+        title: '色觉测试仪 🚥',
+        toggle: 'EN/中文',
+        tabs: {
+          image: '图像模式',
+          color: '颜色模式',
+          contrast: '测对比度',
+          games: '色觉自测'
+        },
+        subtitles: {
+          image: '图像模式：在Figma中选中任一图片或画板来查看效果',
+          color: '颜色模式：选择或输入任意颜色来查看效果',
+          games: '色觉自测：通过经典小游戏来测试自己是否有色觉缺陷',
+          contrast: '测对比度：检查颜色对比度是否符合WCAG无障碍的标准'
+        },
+        common: {
+          back: '返回',
+          backHome: '返回首页',
+          disclaimer: '⚠️ 免责声明：本测试仅供科普参考，不能替代专业医疗诊断。如有疑虑请咨询眼科医生。'
+        },
+        image: {
+          originalPreview: '原图 (正常视觉)',
+          placeholder: '请在Figma中选择一个节点',
+          export: '导出报告至画板',
+          tipTitle: '💡 设计提示：',
+          tipBody: '色觉缺陷影响约8%的男性和0.5%的女性。在设计过程中确保设计要有足够的对比度，不要仅依赖颜色来传达信息，也可以使用图案、标签或图标作为辅助提示。'
+        },
+        color: {
+          selectColor: '选择颜色',
+          comparison: '对比效果',
+          selectedColor: '所选颜色'
+        },
+        games: {
+          card1Title: '找数字色盲测试',
+          card1Desc: '经典Ishihara色板测试，11道标准题目，科学分析结果。',
+          card2Title: '找色差挑战',
+          card2Desc: '在色块中找出不同的那一个，60秒限时挑战，看看你能得多少分！',
+          card3Title: '马赛克色觉阈值测试',
+          card3Desc: '在动态马赛克中找出目标色块，测试你的色觉敏锐度极限。'
+        },
+        contrast: {
+          bgColor: '背景颜色',
+          fgColor: '前景颜色',
+          preview: '预览',
+          largeText: '大文字 (24px+)',
+          normalText: '正常文字在16px。用于常规标题和正文信息',
+          smallText: '小文字在14px，用于大篇幅正文和说明文字',
+          tinyText: '小于14px字号，建议仅用作弱提示文案',
+          compliance: 'WCAG 2.1 合规性',
+          contrastRatio: '对比度',
+          aaNormalTitle: 'AA 正常',
+          aaNormalDetail: '4.5:1 最小（小于18pt 或 14pt粗体）',
+          aaLargeTitle: 'AA 大文字',
+          aaLargeDetail: '3:1 最小（18pt+ 或 14pt+粗体）',
+          aaaNormalTitle: 'AAA 正常',
+          aaaNormalDetail: '7:1 最小（增强可访问性）',
+          aaaLargeTitle: 'AAA 大文字',
+          aaaLargeDetail: '4.5:1 最小（大文字增强可访问性）',
+          infoTitle: 'WCAG 2.1 的 AA 和 AAA 标准说明',
+          infoAA: 'AA 级 (国际主流标准)：行业最常用的标准，它解决了大多数残障人士在使用网络产品时遇到的问题。',
+          infoAAA: 'AAA 级 (最高标准)：最严格、最全面，很难在所有类型的网站实现，但在公共服务或特定需要网站需尽力满足。'
+        },
+        ishihara: {
+          landingTitle: '找数字色盲测试',
+          landingDesc: '这是基于Ishihara色板的色觉测试。请在每一张色板中找出你看到的数字。',
+          feature1: '11道标准测试题目',
+          feature2: '科学的结果分析',
+          start: '开始测试',
+          seeNothing: '看不到任何东西',
+          skip: '跳过',
+          shortcut: '⌨️ 快捷键：数字键输入 | Backspace清除 | Enter下一题',
+          analyzingTitle: '正在分析测试结果',
+          step1: '分析作答记录',
+          step2: '生成测试报告',
+          resultHeading: '📋 测试分析',
+          restart: '重新测试',
+          states: {
+            normal: {
+              title: '色觉正常',
+              desc: '你的测试结果表明你的色觉是正常的。你能够很好地分辨各种颜色，包括红色和绿色的细微差异。'
+            },
+            mild: {
+              title: '轻度色觉障碍',
+              desc: '你的测试结果表明可能存在轻度色觉障碍。建议在选择职业或进行需要精确颜色分辨的工作时予以注意。'
+            },
+            moderate: {
+              title: '中度色觉障碍',
+              desc: '你的测试结果表明可能存在中度色觉障碍。建议咨询专业眼科医生进行进一步检查，特别是在需要精确颜色判断的场景。'
+            },
+            severe: {
+              title: '重度色觉障碍',
+              desc: '你的测试结果表明可能存在重度色觉障碍。强烈建议咨询专业眼科医生进行全面检查，以确定具体类型和程度。'
+            }
+          }
+        },
+        colorDiff: {
+          landingTitle: '找色差挑战',
+          landingDesc: '在多个相同颜色的色块中，找出那一个颜色略有不同的方块。限时60秒，看看你能得多少分！',
+          easy: '初级',
+          normal: '中级',
+          hard: '高级',
+          bestScore: '🏆 历史最高分',
+          start: '开始游戏',
+          level: '关卡',
+          score: '得分',
+          time: '时间',
+          pause: '暂停',
+          resume: '继续',
+          timeUp: '⏰ 时间到！',
+          newRecord: '🎉 新纪录！',
+          cleared: '通过关卡',
+          correct: '正确点击',
+          wrong: '错误点击',
+          playAgain: '再玩一次'
+        },
+        mosaic: {
+          landingTitle: '马赛克色觉测试',
+          landingDesc: '在动态马赛克中找出目标色块，测试你的色觉敏锐度极限，为你分析有什么类型的色觉障碍。',
+          start: '开始测试',
+          mainTitle: '马赛克色觉测试',
+          axis1: '红绿色觉',
+          axis2: '紫蓝色觉',
+          axis3: '紫绿色觉',
+          hint: '点击马赛克中的小方块！',
+          cantSee: '我看不到',
+          restart: '重新开始',
+          exit: '退出',
+          diagnosisTitle: '诊断结果',
+          diagnosisNormal: '结果正常',
+          mild: '轻度',
+          moderate: '中度',
+          severe: '重度',
+          deficiencySuffix: '类型的色觉缺陷',
+          resultTitle: '结果正常'
+        },
+        types: {
+          normal: { name: '正常', description: '完整的彩色视觉', prevalence: '约92%的人' },
+          protanopia: { name: '红色盲', description: '红色不敏感，看起来更暗', prevalence: '约1%的男性' },
+          deuteranopia: { name: '绿色盲', description: '绿色不敏感，常见色盲类型', prevalence: '约1%的男性' },
+          tritanopia: { name: '蓝色盲', description: '蓝色不敏感，比较罕见', prevalence: '不到0.01%' },
+          protanomaly: { name: '红色弱', description: '红色感知能力降低', prevalence: '约1%的男性' },
+          deuteranomaly: { name: '绿色弱', description: '绿色感知能力弱，较常见', prevalence: '约5%的男性' },
+          tritanomaly: { name: '蓝色弱', description: '蓝色感知能力降低', prevalence: '不到0.01%' }
+        }
+      }
+    };
+
+    function t(path) {
+      return path.split('.').reduce((obj, key) => obj && obj[key], I18N[currentLanguage]);
+    }
+
+    function getTypeInfo(key) {
+      var typeInfo = t(`types.${key}`);
+      return { key: key, name: typeInfo.name, description: typeInfo.description, prevalence: typeInfo.prevalence };
+    }
+
+    function setText(target, value) {
+      const element = typeof target === 'string' ? document.querySelector(target) : target;
+      if (element) element.textContent = value;
+    }
+
+    function setHTML(target, value) {
+      const element = typeof target === 'string' ? document.querySelector(target) : target;
+      if (element) element.innerHTML = value;
+    }
+
+    function bindById(id, eventName, handler) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.addEventListener(eventName, handler);
+      } else {
+        console.warn(`Missing element: ${id}`);
+      }
+    }
+
+    function updateSubtitle() {
+      setText('#subtitle', t(`subtitles.${currentTab}`));
+    }
+
+    function updatePauseButton() {
+      setText('#g2-pause', g2State.paused ? t('colorDiff.resume') : t('colorDiff.pause'));
+    }
+
+    function updateMosaicDiagnosis() {
+      setText('#diagnosis-title', t('mosaic.diagnosisTitle'));
+      if (!mosaicState.isFinished) return;
+
+      let diagnosis;
+      if (mosaicState.results[0] > 80 || (mosaicState.results[0] === 80 && mosaicState.results[1] > 75 && mosaicState.results[2] > 80)) {
+        diagnosis = t('mosaic.diagnosisNormal');
+      } else {
+        const typeKey = mosaicState.results[2] < mosaicState.results[1] ? 'deuteranopia' : 'protanopia';
+        let severity;
+        if (mosaicState.results[0] < 25 && (mosaicState.results[1] < 40 || mosaicState.results[2] < 40)) {
+          severity = t('mosaic.severe');
+        } else if (mosaicState.results[0] < 60) {
+          severity = t('mosaic.moderate');
+        } else {
+          severity = t('mosaic.mild');
+        }
+        diagnosis = `${severity}${getTypeInfo(typeKey).name}${t('mosaic.deficiencySuffix')}`;
+      }
+
+      setText('#diagnosis-text', diagnosis);
+    }
+
+    function applyLanguage(language) {
+      currentLanguage = language === 'zh' ? 'zh' : 'en';
+      document.documentElement.lang = currentLanguage === 'en' ? 'en' : 'zh-CN';
+      document.title = t('title');
+      setText('#page-title', t('title'));
+      setText('#tab-label-image', t('tabs.image'));
+      setText('#tab-label-color', t('tabs.color'));
+      setText('#tab-label-contrast', t('tabs.contrast'));
+      setText('#tab-label-games', t('tabs.games'));
+      document.querySelectorAll('.back-btn-text').forEach(el => setText(el, t('common.back')));
+      const langEnBtn = document.getElementById('lang-en-btn');
+      const langZhBtn = document.getElementById('lang-zh-btn');
+      if (langEnBtn) langEnBtn.classList.toggle('active', currentLanguage === 'en');
+      if (langZhBtn) langZhBtn.classList.toggle('active', currentLanguage === 'zh');
+
+      updateSubtitle();
+
+      CVD_TYPE_KEYS.filter(key => key !== 'normal').forEach(key => {
+        setText(`#type-selector .type-btn[data-type="${key}"]`, getTypeInfo(key).name);
+      });
+      setText('#image-content .preview-box:first-child .preview-label', t('image.originalPreview'));
+      setText('#original-placeholder', t('image.placeholder'));
+      setText('#simulated-placeholder', t('image.placeholder'));
+      setText('#export-report-btn', t('image.export'));
+      setHTML('#image-content .info-box p:first-child', `<strong>${t('image.tipTitle')}</strong>`);
+      setText('#image-content .info-box p:last-child', t('image.tipBody'));
+
+      setText('#color-content .select-color-label', t('color.selectColor'));
+      setText('#color-content .comparison-label', t('color.comparison'));
+      const comparisonLabels = document.querySelectorAll('#color-content .comparison-box-label');
+      setText(comparisonLabels[0], t('color.selectedColor'));
+
+      setText('#game1-card h3', t('games.card1Title'));
+      setText('#game1-card p', t('games.card1Desc'));
+      setText('#game2-card h3', t('games.card2Title'));
+      setText('#game2-card p', t('games.card2Desc'));
+      setText('#game3-card h3', t('games.card3Title'));
+      setText('#game3-card p', t('games.card3Desc'));
+
+      const colorLabels = document.querySelectorAll('#contrast-content .color-picker-label');
+      setText(colorLabels[0], t('contrast.bgColor'));
+      setText(colorLabels[1], t('contrast.fgColor'));
+      const contrastSectionLabels = document.querySelectorAll('#contrast-content .contrast-section-label');
+      setText(contrastSectionLabels[0], t('contrast.preview'));
+      setText(contrastSectionLabels[1], t('contrast.compliance'));
+      const previewTexts = document.querySelectorAll('#contrast-preview p');
+      setText(previewTexts[0], t('contrast.largeText'));
+      setText(previewTexts[1], t('contrast.normalText'));
+      setText(previewTexts[2], t('contrast.smallText'));
+      setText(previewTexts[3], t('contrast.tinyText'));
+      setText('.ratio-label', t('contrast.contrastRatio'));
+      const complianceTitles = document.querySelectorAll('#contrast-content .compliance-title');
+      setText(complianceTitles[0], t('contrast.aaNormalTitle'));
+      setText(complianceTitles[1], t('contrast.aaLargeTitle'));
+      setText(complianceTitles[2], t('contrast.aaaNormalTitle'));
+      setText(complianceTitles[3], t('contrast.aaaLargeTitle'));
+      const complianceDetails = document.querySelectorAll('#contrast-content .compliance-detail');
+      setText(complianceDetails[0], t('contrast.aaNormalDetail'));
+      setText(complianceDetails[1], t('contrast.aaLargeDetail'));
+      setText(complianceDetails[2], t('contrast.aaaNormalDetail'));
+      setText(complianceDetails[3], t('contrast.aaaLargeDetail'));
+      if (currentLanguage === 'zh') {
+        setHTML('#contrast-content .info-box p:first-child', '<strong>WCAG 2.1 的 AA 和 AAA 标准说明</strong>');
+        setHTML('#contrast-content .info-box p:nth-child(2)', '<strong>AA 级 (国际主流标准)：</strong>行业最常用的标准，它解决了大多数残障人士在使用网络产品时遇到的问题。');
+        setHTML('#contrast-content .info-box p:nth-child(3)', '<strong>AAA 级 (最高标准)：</strong>最严格、最全面，很难在所有类型的网站实现，但在公共服务或特定需要网站需尽力满足。');
+      } else {
+        setHTML('#contrast-content .info-box p:first-child', '<strong>About WCAG 2.1 AA and AAA</strong>');
+        setHTML('#contrast-content .info-box p:nth-child(2)', '<strong>AA (industry baseline):</strong> the most common standard and a practical target for most accessible product experiences.');
+        setHTML('#contrast-content .info-box p:nth-child(3)', '<strong>AAA (highest target):</strong> the strictest level, difficult to achieve everywhere, but worth aiming for in public-service and high-need scenarios.');
+      }
+
+      setText('#ishihara-landing .landing-title', t('ishihara.landingTitle'));
+      setText('#ishihara-landing .landing-desc', t('ishihara.landingDesc'));
+      const ishiharaFeatures = document.querySelectorAll('#ishihara-landing .feature-item');
+      if (ishiharaFeatures[0]) ishiharaFeatures[0].lastChild.textContent = t('ishihara.feature1');
+      if (ishiharaFeatures[1]) ishiharaFeatures[1].lastChild.textContent = t('ishihara.feature2');
+      setText('#ishihara-start', t('ishihara.start'));
+      setText('#btn-nothing', t('ishihara.seeNothing'));
+      setText('#btn-skip', t('ishihara.skip'));
+      setText('#ishihara-testing .shortcut-hint', t('ishihara.shortcut'));
+      setText('#ishihara-analyzing h3', t('ishihara.analyzingTitle'));
+      const ishiharaSteps = document.querySelectorAll('#ishihara-analyzing .step-text');
+      setText(ishiharaSteps[0], t('ishihara.step1'));
+      setText(ishiharaSteps[1], t('ishihara.step2'));
+      setText('#ishihara-result .result-detail h4', t('ishihara.resultHeading'));
+      setText('#ishihara-result .disclaimer', t('common.disclaimer'));
+      setText('#ishihara-restart', t('ishihara.restart'));
+      setText('#ishihara-exit', t('common.backHome'));
+
+      setText('#colordiff-landing .landing-title', t('colorDiff.landingTitle'));
+      setText('#colordiff-landing .landing-desc', t('colorDiff.landingDesc'));
+      setText('#diff-selector .diff-btn[data-diff="easy"]', t('colorDiff.easy'));
+      setText('#diff-selector .diff-btn[data-diff="normal"]', t('colorDiff.normal'));
+      setText('#diff-selector .diff-btn[data-diff="hard"]', t('colorDiff.hard'));
+      setText('#game2-highscore .label', t('colorDiff.bestScore'));
+      setText('#colordiff-start', t('colorDiff.start'));
+      const game2HeaderLabels = document.querySelectorAll('#colordiff-playing .stat-label');
+      setText(game2HeaderLabels[0], t('colorDiff.level'));
+      setText(game2HeaderLabels[1], t('colorDiff.score'));
+      setText(game2HeaderLabels[2], t('colorDiff.time'));
+      updatePauseButton();
+      setText('#colordiff-result h2', t('colorDiff.timeUp'));
+      setText('#g2-new-record', t('colorDiff.newRecord'));
+      const game2ResultLabels = document.querySelectorAll('#colordiff-result .stat-card .label');
+      setText(game2ResultLabels[0], t('colorDiff.cleared'));
+      setText(game2ResultLabels[1], t('colorDiff.correct'));
+      setText(game2ResultLabels[2], t('colorDiff.wrong'));
+      setText('#g2-play-again', t('colorDiff.playAgain'));
+      setText('#g2-exit', t('common.backHome'));
+
+      setText('#mosaic-landing .landing-title', t('mosaic.landingTitle'));
+      setText('#mosaic-landing .landing-desc', t('mosaic.landingDesc'));
+      setText('#mosaic-start', t('mosaic.start'));
+      setText('#mosaic-test-view h2', t('mosaic.mainTitle'));
+      setText('#mosaic-axis-label-1', t('mosaic.axis1'));
+      setText('#mosaic-axis-label-2', t('mosaic.axis2'));
+      setText('#mosaic-axis-label-3', t('mosaic.axis3'));
+      setText('#mosaic-result-axis-label-1', t('mosaic.axis1'));
+      setText('#mosaic-result-axis-label-2', t('mosaic.axis2'));
+      setText('#mosaic-result-axis-label-3', t('mosaic.axis3'));
+      setText('#komment', t('mosaic.hint'));
+      setText('#btn-idk', t('mosaic.cantSee'));
+      setText('#btn-restart', t('mosaic.restart'));
+      setText('#btn-exit', t('mosaic.exit'));
+      setText('#mosaic-result-view .disclaimer', t('common.disclaimer'));
+      setText('#btn-restart2', t('mosaic.restart'));
+      setText('#btn-back', t('common.backHome'));
+
+      updateSimulatedLabel(currentType);
+      renderModeCards();
+      updateComparison();
+      updateContrast();
+      updateMosaicDiagnosis();
+
+      if (!document.getElementById('ishihara-result').classList.contains('hidden')) {
+        showIshiharaResult();
+      }
+
+      parent.postMessage({ pluginMessage: { type: 'set-language', language: currentLanguage } }, '*');
+    }
+    
+    function simulateColorBlind(r, g, b, type) {
+      const matrix = ColorBlindMatrix[type];
+      const nr = r * matrix[0] + g * matrix[1] + b * matrix[2];
+      const ng = r * matrix[3] + g * matrix[4] + b * matrix[5];
+      const nb = r * matrix[6] + g * matrix[7] + b * matrix[8];
+      return [Math.max(0, Math.min(255, nr)), Math.max(0, Math.min(255, ng)), Math.max(0, Math.min(255, nb))];
+    }
+    
+    function applyFilter(imageData, type) {
+      console.log('🎨 应用滤镜:', type);
+      
+      const data = imageData.data;
+      const matrix = ColorBlindMatrix[type];
+      
+      if (!matrix) {
+        console.error('❌ 找不到对应的色彩矩阵:', type);
+        return imageData;
+      }
+      
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        
+        const nr = r * matrix[0] + g * matrix[1] + b * matrix[2];
+        const ng = r * matrix[3] + g * matrix[4] + b * matrix[5];
+        const nb = r * matrix[6] + g * matrix[7] + b * matrix[8];
+        
+        data[i] = Math.max(0, Math.min(255, nr));
+        data[i + 1] = Math.max(0, Math.min(255, ng));
+        data[i + 2] = Math.max(0, Math.min(255, nb));
+        // Alpha 通道保持不变
+      }
+      
+      return imageData;
+    }
+    
+    // ==================== MAIN PAGE ====================
+    let currentOriginalImage = null; // 保存完整的所选颜色图像对象
+    let currentType = 'protanopia';
+
+    function updateSimulatedLabel(type) {
+      const simulatedLabel = document.getElementById('simulated-label');
+      const simulatedTypeName = simulatedLabel ? simulatedLabel.querySelector('.type-name') : null;
+      const simulatedPrevalence = document.getElementById('image-simulated-prevalence');
+      const cvd = getTypeInfo(type);
+      
+      if (simulatedTypeName && cvd) simulatedTypeName.textContent = cvd.name;
+      if (simulatedPrevalence && cvd) simulatedPrevalence.textContent = cvd.prevalence;
+    }
+
+    function initImageMode() {
+      console.log('🔧 初始化图像模式...');
+      
+      const typeButtons = document.querySelectorAll('#type-selector .type-btn');
+      
+      // 初始化时更新一次标签
+      updateSimulatedLabel(currentType);
+      
+      typeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          console.log('🎨 点击了类型按钮:', btn.dataset.type);
+          
+          typeButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentType = btn.dataset.type;
+          
+          updateSimulatedLabel(currentType);
+          
+          if (currentOriginalImage) {
+            updateSimulation();
+          }
+        });
+      });
+      
+      // 添加导出报告按钮事件
+      const exportBtn = document.getElementById('export-report-btn');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          console.log('📊 导出报告按钮被点击');
+          parent.postMessage({ pluginMessage: { type: 'generate-report' } }, '*');
+        });
+      }
+    }
+    
+    // 生成所有色盲模拟的图像（用于报告）
+    async function generateSimulatedImagesForReport(imageData) {
+      console.log('🔄 正在生成所有色盲模拟图像...');
+      
+      // 用于绘制的临时 canvas
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+      
+      // 用于缓存所选颜色图像的 canvas
+      const originalCanvas = document.createElement('canvas');
+      const originalCtx = originalCanvas.getContext('2d');
+      
+      const img = new Image();
+      const blob = new Blob([imageData], { type: 'image/png' });
+      const url = URL.createObjectURL(blob);
+      
+      await new Promise((resolve) => {
+        img.onload = resolve;
+        img.src = url;
+      });
+      
+      tempCanvas.width = img.width;
+      tempCanvas.height = img.height;
+      originalCanvas.width = img.width;
+      originalCanvas.height = img.height;
+      
+      // 将所选颜色图像绘制到两个 canvas 上
+      tempCtx.drawImage(img, 0, 0);
+      originalCtx.drawImage(img, 0, 0);
+      
+      const simulatedImages = [];
+      
+      for (let i = 0; i < CVD_TYPE_KEYS.length; i++) {
+        const type = CVD_TYPE_KEYS[i];
+        
+        // 每次都从所选颜色图像重新开始
+        const imgData = originalCtx.getImageData(0, 0, img.width, img.height);
+        const filteredData = applyFilter(imgData, type);
+        
+        // 清除临时 canvas 并绘制滤镜结果
+        tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+        tempCtx.putImageData(filteredData, 0, 0);
+        
+        const dataUrl = tempCanvas.toDataURL('image/png');
+        const base64 = dataUrl.split(',')[1];
+        
+        const binaryString = atob(base64);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let j = 0; j < binaryString.length; j++) {
+          bytes[j] = binaryString.charCodeAt(j);
+        }
+        
+        simulatedImages.push(bytes);
+      }
+      
+      URL.revokeObjectURL(url);
+      console.log('✅ 所有色盲模拟图像生成完成');
+      return simulatedImages;
+    }
+    
+    function updateSimulation() {
+      console.log('🔄 更新预览... currentType:', currentType);
+      
+      if (!currentOriginalImage) {
+        console.warn('⚠️ 没有所选颜色图像可更新');
+        return;
+      }
+      
+      const originalCanvas = document.getElementById('original-canvas');
+      const simulatedCanvas = document.getElementById('simulated-canvas');
+      const originalCtx = originalCanvas.getContext('2d');
+      const simulatedCtx = simulatedCanvas.getContext('2d');
+      
+      // 确保画布尺寸一致
+      simulatedCanvas.width = originalCanvas.width;
+      simulatedCanvas.height = originalCanvas.height;
+      
+      // 获取所选颜色图像数据
+      const imageData = originalCtx.getImageData(0, 0, originalCanvas.width, originalCanvas.height);
+      
+      // 应用滤镜
+      const filteredData = applyFilter(imageData, currentType);
+      
+      // 绘制到右侧画布
+      simulatedCtx.putImageData(filteredData, 0, 0);
+      
+      // 隐藏占位符
+      document.getElementById('simulated-placeholder').classList.add('hidden');
+      console.log('✅ 预览更新完成');
+    }
+    
+    function loadImage(bytes) {
+      console.log('🖼️ 加载图像数据...');
+      
+      const originalCanvas = document.getElementById('original-canvas');
+      const originalCtx = originalCanvas.getContext('2d');
+      
+      const blob = new Blob([bytes], { type: 'image/png' });
+      const url = URL.createObjectURL(blob);
+      
+      const img = new Image();
+      img.onload = () => {
+        console.log('📷 图像加载成功，尺寸:', img.width, 'x', img.height);
+        
+        // 绘制到所选颜色画布上
+        originalCanvas.width = img.width;
+        originalCanvas.height = img.height;
+        originalCtx.drawImage(img, 0, 0);
+        
+        // 保存所选颜色图像对象
+        currentOriginalImage = img;
+        
+        // 更新模拟预览
+        updateSimulation();
+        
+        // 隐藏占位符
+        document.getElementById('original-placeholder').classList.add('hidden');
+        
+        // 释放 URL 对象
+        URL.revokeObjectURL(url);
+      };
+      
+      img.onerror = (error) => {
+        console.error('❌ 图像加载失败:', error);
+      };
+      
+      img.src = url;
+    }
+    
+    onmessage = async (event) => {
+      console.log('📨 收到消息:', event.data);
+      const msg = event.data.pluginMessage;
+      if (msg) {
+        console.log('📨 插件消息类型:', msg.type);
+        if (msg.type === 'image-data') {
+          loadImage(msg.data);
+        } else if (msg.type === 'ishihara-asset') {
+          receiveIshiharaAsset(msg.code, msg.svg);
+        } else if (msg.type === 'ishihara-assets-complete') {
+          finalizeIshiharaAssets();
+        } else if (msg.type === 'no-selection') {
+          console.log('⚠️ Figma 中没有选中任何节点');
+        } else if (msg.type === 'error') {
+          console.error('❌ 插件错误:', msg.message);
+        } else if (msg.type === 'prepare-simulations') {
+          // 收到生成报告模拟图像的请求
+          console.log('🎨 收到生成报告模拟图像的请求');
+          try {
+            const images = await generateSimulatedImagesForReport(msg.data);
+            parent.postMessage({ pluginMessage: { type: 'create-report', images: images } }, '*');
+          } catch (error) {
+            console.error('❌ 生成模拟图像失败:', error);
+          }
+        }
+      }
+    };
+    
+    setTimeout(() => {
+      console.log('⏰ 初始化完成，请求获取图像');
+      parent.postMessage({ pluginMessage: { type: 'get-image' } }, '*');
+    }, 100);
+    
+    // ==================== PAGE NAVIGATION ====================
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      
+      // 如果是马赛克页面，显示说明页
+      if (pageId === 'mosaic-page') {
+        document.getElementById('mosaic-landing').classList.remove('hidden');
+        document.getElementById('mosaic-test-view').classList.add('hidden');
+        document.getElementById('mosaic-result-view').classList.add('hidden');
+      }
+    }
+    
+    // Game cards
+    bindById('game1-card', 'click', () => showPage('ishihara-page'));
+    bindById('game2-card', 'click', () => showPage('colordiff-page'));
+    bindById('game3-card', 'click', () => showPage('mosaic-page'));
+    
+    // Back buttons
+    bindById('ishihara-back', 'click', () => showPage('main-page'));
+    bindById('colordiff-back', 'click', () => showPage('main-page'));
+    bindById('mosaic-back', 'click', () => showPage('main-page'));
+    
+    // ==================== GAME 1: ISHIHARA ====================
+    // 11 Standard Ishihara Plates: 02, 05, 07, 08, 12, 16, 29, 35, 45, 74, 96
+    const IshiharaPlates = [
+      { id: 1, normalAnswer: '2', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' },
+      { id: 2, normalAnswer: '5', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' },
+      { id: 3, normalAnswer: '7', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' },
+      { id: 4, normalAnswer: '8', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' },
+      { id: 5, normalAnswer: '12', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' },
+      { id: 6, normalAnswer: '16', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' },
+      { id: 7, normalAnswer: '29', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' },
+      { id: 8, normalAnswer: '35', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' },
+      { id: 9, normalAnswer: '45', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' },
+      { id: 10, normalAnswer: '74', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' },
+      { id: 11, normalAnswer: '96', protanAnswer: '', deutanAnswer: '', tritanAnswer: '' }
+    ];
+    // Large inline Ishihara SVG assets were removed to keep the Figma UI payload small enough for showUI.
+    const IshiharaSVGCache = {};
+    let ishiharaAssetsReadyPromise = null;
+    let resolveIshiharaAssetsReady = null;
+    let ishiharaAssetMessageCount = 0;
+    const IshiharaExpectedAssetCount = IshiharaPlates.length;
+    let ishiharaState = {
+      currentIndex: 0,
+      answers: [],
+      shuffledIndices: [] // 用于存储打乱后的索引顺序
+    };
+    
+    function drawSimulatedPlate(canvas) {
+      const ctx = canvas.getContext('2d');
+      const size = 300;
+      canvas.width = size; canvas.height = size;
+      
+      const plateIndex = ishiharaState.currentIndex;
+      const plate = IshiharaPlates[plateIndex];
+      
+      // 直接绘制简单清晰的色板
+      ctx.fillStyle = '#fffef9';
+      ctx.fillRect(0, 0, size, size);
+      
+      // 米色背景
+      const bgGradient = ctx.createRadialGradient(size/2, size/2, 20, size/2, size/2, size/2);
+      bgGradient.addColorStop(0, '#faf0e6');
+      bgGradient.addColorStop(1, '#f0e0d0');
+      ctx.fillStyle = bgGradient;
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 10, 0, Math.PI*2);
+      ctx.fill();
+      
+      // 直接显示数字，清晰明了
+      ctx.fillStyle = '#5ba758';
+      ctx.font = 'bold 130px Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      const text = plate.normalAnswer || '12';
+      ctx.fillText(text, size/2, size/2);
+    }
+
+    function ensureIshiharaAssetsPromise() {
+      if (!ishiharaAssetsReadyPromise) {
+        ishiharaAssetsReadyPromise = new Promise(function(resolve) {
+          resolveIshiharaAssetsReady = resolve;
+        });
+      }
+      return ishiharaAssetsReadyPromise;
+    }
+
+    function finalizeIshiharaAssets() {
+      if (resolveIshiharaAssetsReady) {
+        resolveIshiharaAssetsReady(IshiharaSVGCache);
+        resolveIshiharaAssetsReady = null;
+      }
+    }
+
+    function requestIshiharaAssets() {
+      ensureIshiharaAssetsPromise();
+      parent.postMessage({ pluginMessage: { type: 'request-ishihara-assets' } }, '*');
+      return ishiharaAssetsReadyPromise;
+    }
+
+    function receiveIshiharaAsset(code, svgText) {
+      if (!code || !svgText || IshiharaSVGCache[code]) {
+        return;
+      }
+      IshiharaSVGCache[code] = svgText;
+      ishiharaAssetMessageCount += 1;
+      if (ishiharaAssetMessageCount >= IshiharaExpectedAssetCount) {
+        finalizeIshiharaAssets();
+      }
+    }
+
+    function injectIshiharaSVG(display, svgText, plateCode) {
+      display.innerHTML = svgText;
+      const svgElement = display.querySelector('svg');
+      if (svgElement) {
+        svgElement.classList.add('plate-image');
+        svgElement.setAttribute('width', '100%');
+        svgElement.setAttribute('height', '100%');
+        svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        svgElement.setAttribute('role', 'img');
+        svgElement.setAttribute('aria-label', `Ishihara plate ${plateCode}`);
+        svgElement.style.width = '100%';
+        svgElement.style.height = '100%';
+        svgElement.style.display = 'block';
+      }
+    }
+
+    function preloadIshiharaAssets() {
+      return requestIshiharaAssets();
+    }
+
+    function renderIshiharaPlate(display, plate) {
+      const plateCode = String(plate.normalAnswer || '').padStart(2, '0');
+      display.dataset.plateCode = plateCode;
+      const cachedSVG = IshiharaSVGCache[plateCode];
+      if (cachedSVG) {
+        injectIshiharaSVG(display, cachedSVG, plateCode);
+        return;
+      }
+
+      display.textContent = '...';
+
+      preloadIshiharaAssets().then(function() {
+        if (display.dataset.plateCode !== plateCode) {
+          return;
+        }
+        const svgText = IshiharaSVGCache[plateCode];
+        if (svgText) {
+          injectIshiharaSVG(display, svgText, plateCode);
+          return;
+        }
+
+        display.innerHTML = '<canvas id="ishihara-canvas" style="width:100%;height:100%;display:block;"></canvas>';
+        const canvas = document.getElementById('ishihara-canvas');
+        if (canvas) {
+          drawSimulatedPlate(canvas);
+        }
+      });
+    }
+    
+    // 打乱数组的函数
+    function shuffleArray(arr) {
+      const shuffled = [...arr];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+    
+    function initIshihara() {
+      preloadIshiharaAssets();
+      // 初始化打乱后的索引
+      ishiharaState.shuffledIndices = shuffleArray([...Array(IshiharaPlates.length).keys()]);
+      ishiharaState.answers = [];
+      IshiharaPlates.forEach((p, index) => {
+        ishiharaState.answers.push({
+          plateId: p.id,
+          originalIndex: index, // 记录所选颜色索引，便于结果统计
+          answer: '',
+          isNothing: false,
+          isSkip: false
+        });
+      });
+      showIshiharaLanding();
+    }
+    
+    function showIshiharaLanding() {
+      document.getElementById('ishihara-landing').classList.remove('hidden');
+      document.getElementById('ishihara-testing').classList.add('hidden');
+      document.getElementById('ishihara-analyzing').classList.add('hidden');
+      document.getElementById('ishihara-result').classList.add('hidden');
+    }
+    
+    function startIshiharaTest() {
+      document.getElementById('ishihara-landing').classList.add('hidden');
+      document.getElementById('ishihara-testing').classList.remove('hidden');
+      // 重新打乱色板顺序
+      ishiharaState.shuffledIndices = shuffleArray([...Array(IshiharaPlates.length).keys()]);
+      ishiharaState.currentIndex = 0;
+      ishiharaState.answers = [];
+      IshiharaPlates.forEach((p, index) => {
+        ishiharaState.answers.push({
+          plateId: p.id,
+          originalIndex: index, // 记录所选颜色索引，便于结果统计
+          answer: '',
+          isNothing: false,
+          isSkip: false
+        });
+      });
+      updateIshiharaPlate();
+    }
+    
+    function getCurrentPlateIndex() {
+      return ishiharaState.shuffledIndices[ishiharaState.currentIndex];
+    }
+    
+    function updateIshiharaPlate() {
+      const plateIndex = getCurrentPlateIndex();
+      const plate = IshiharaPlates[plateIndex];
+      if (!plate) return;
+      
+      document.getElementById('ishihara-progress-text').textContent = `${ishiharaState.currentIndex+1} / ${IshiharaPlates.length}`;
+      document.getElementById('ishihara-progress-fill').style.width = `${((ishiharaState.currentIndex+1)/IshiharaPlates.length)*100}%`;
+      
+      const display = document.getElementById('plate-display');
+      renderIshiharaPlate(display, plate);
+
+      // 显示当前色板已填写的答案
+      document.getElementById('answer-display').textContent = ishiharaState.answers[plateIndex].answer || '_';
+    }
+    
+    function addNumber(num) {
+      const plateIndex = getCurrentPlateIndex();
+      if (ishiharaState.answers[plateIndex].answer.length < 3) {
+        ishiharaState.answers[plateIndex].answer += num;
+        document.getElementById('answer-display').textContent = ishiharaState.answers[plateIndex].answer || '_';
+      }
+    }
+    
+    function clearAnswer() {
+      const plateIndex = getCurrentPlateIndex();
+      ishiharaState.answers[plateIndex].answer = '';
+      document.getElementById('answer-display').textContent = '_';
+    }
+    
+    function nextPlate() {
+      if (ishiharaState.currentIndex < IshiharaPlates.length -1) {
+        ishiharaState.currentIndex++;
+        updateIshiharaPlate();
+      } else {
+        finishIshiharaTest();
+      }
+    }
+    
+    function markNothing() {
+      const plateIndex = getCurrentPlateIndex();
+      ishiharaState.answers[plateIndex].isNothing = true;
+      ishiharaState.answers[plateIndex].answer = '';
+      nextPlate();
+    }
+    
+    function markSkip() {
+      const plateIndex = getCurrentPlateIndex();
+      ishiharaState.answers[plateIndex].isSkip = true;
+      nextPlate();
+    }
+    
+    function finishIshiharaTest() {
+      document.getElementById('ishihara-testing').classList.add('hidden');
+      document.getElementById('ishihara-analyzing').classList.remove('hidden');
+      
+      let stepIndex = 0;
+      const steps = ['step-1','step-2'];
+      
+      const stepInterval = setInterval(() => {
+        if (stepIndex >0) {
+          document.getElementById(steps[stepIndex-1]).classList.remove('active');
+          document.getElementById(steps[stepIndex-1]).classList.add('completed');
+        }
+        if (stepIndex < 2) {
+          document.getElementById(steps[stepIndex]).classList.add('active');
+          stepIndex++;
+        } else {
+          clearInterval(stepInterval);
+          showIshiharaResult();
+        }
+      }, 800);
+    }
+    
+    function showIshiharaResult() {
+      document.getElementById('ishihara-analyzing').classList.add('hidden');
+      document.getElementById('ishihara-result').classList.remove('hidden');
+      
+      // 计算答错的数量
+      let wrongCount = 0;
+      
+      for (let i = 0; i < IshiharaPlates.length; i++) {
+        const plate = IshiharaPlates[i];
+        const answer = ishiharaState.answers[i];
+        const userAnswer = answer.answer.trim();
+        const correctAnswer = plate.normalAnswer;
+        
+        const isNothing = answer.isNothing;
+        const isSkipped = answer.isSkip;
+        
+        if (isNothing || isSkipped) {
+          wrongCount++;
+        } else if (userAnswer !== correctAnswer) {
+          wrongCount++;
+        }
+      }
+      
+      const totalQuestions = IshiharaPlates.length;
+      const correctCount = totalQuestions - wrongCount;
+      
+      document.getElementById('result-score').textContent = `${correctCount} / ${totalQuestions}`;
+      
+      // 判断结果：答错2个以上代表有色觉障碍
+      if (wrongCount < 2) {
+        // 答错0-1个，正常
+        document.getElementById('result-icon').textContent = '🎉';
+        document.getElementById('result-title').textContent = t('ishihara.states.normal.title');
+        document.getElementById('result-desc').textContent = t('ishihara.states.normal.desc');
+      } else if (wrongCount >= 2 && wrongCount <= 4) {
+        // 答错2-4个，轻度
+        document.getElementById('result-icon').textContent = '⚠️';
+        document.getElementById('result-title').textContent = t('ishihara.states.mild.title');
+        document.getElementById('result-desc').textContent = t('ishihara.states.mild.desc');
+      } else if (wrongCount >= 5 && wrongCount <= 8) {
+        // 答错5-8个，中度
+        document.getElementById('result-icon').textContent = '⚠️';
+        document.getElementById('result-title').textContent = t('ishihara.states.moderate.title');
+        document.getElementById('result-desc').textContent = t('ishihara.states.moderate.desc');
+      } else {
+        // 答错9个以上，重度
+        document.getElementById('result-icon').textContent = '⚠️';
+        document.getElementById('result-title').textContent = t('ishihara.states.severe.title');
+        document.getElementById('result-desc').textContent = t('ishihara.states.severe.desc');
+      }
+      
+      try { localStorage.setItem('ishiharaLastResult', JSON.stringify({ score: correctCount, wrongCount: wrongCount, date: new Date().toISOString() })); } catch(e) {}
+    }
+    
+    bindById('ishihara-start', 'click', startIshiharaTest);
+    bindById('ishihara-restart', 'click', () => {
+      showIshiharaLanding();
+    });
+    bindById('ishihara-exit', 'click', () => showPage('main-page'));
+    
+    document.querySelectorAll('.num-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const num = btn.dataset.num;
+        if (num === 'clear') clearAnswer();
+        else if (num === 'next') nextPlate();
+        else addNumber(num);
+      });
+    });
+    
+    bindById('btn-nothing', 'click', markNothing);
+    bindById('btn-skip', 'click', markSkip);
+    
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('ishihara-testing').classList.contains('hidden')) return;
+      
+      if (e.key >= '0' && e.key <= '9') addNumber(e.key);
+      else if (e.key === 'Backspace') clearAnswer();
+      else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        nextPlate();
+      }
+    });
+    
+    // ==================== GAME 2: COLOR DIFF ====================
+    const DIFFICULTIES = {
+      easy: { startGrid:3, deltaStart:40, deltaDecay:1.5 },
+      normal: { startGrid:4, deltaStart:30, deltaDecay:2 },
+      hard: { startGrid:5, deltaStart:20, deltaDecay:2.5 }
+    };
+    
+    let g2State = {
+      difficulty: 'normal',
+      level:1, score:0, correct:0, wrong:0, timeLeft:60,
+      timer: null, paused: false
+    };
+    
+    function initColorDiff() {
+      let savedHighScore = null;
+      try {
+        savedHighScore = localStorage.getItem('colorDiffHighScore');
+      } catch (error) {
+        // Figma 插件环境可能禁用 localStorage，避免初始化中断后续游戏模块
+        savedHighScore = null;
+      }
+      if(savedHighScore) {
+        document.getElementById('game2-highscore').classList.remove('hidden');
+        document.getElementById('highscore-value').textContent = savedHighScore;
+      }
+      showColorDiffLanding();
+    }
+    
+    function showColorDiffLanding() {
+      document.getElementById('colordiff-landing').classList.remove('hidden');
+      document.getElementById('colordiff-playing').classList.add('hidden');
+      document.getElementById('colordiff-result').classList.add('hidden');
+    }
+    
+    function startColorDiff() {
+      document.getElementById('colordiff-landing').classList.add('hidden');
+      document.getElementById('colordiff-playing').classList.remove('hidden');
+      
+      g2State = {
+        difficulty: document.querySelector('.diff-btn.active').dataset.diff,
+        level:1, score:0, correct:0, wrong:0, timeLeft:60, timer: null, paused:false
+      };
+      
+      updateG2Stats();
+      generateG2Grid();
+      
+      g2State.timer = setInterval(() => {
+        if(!g2State.paused) {
+          g2State.timeLeft--;
+          document.getElementById('g2-timer').textContent = g2State.timeLeft;
+          if(g2State.timeLeft <=0) finishColorDiffGame();
+        }
+      }, 1000);
+    }
+    
+    function generateG2Grid() {
+      const config = DIFFICULTIES[g2State.difficulty];
+      let gridSize = Math.min(config.startGrid + Math.floor(g2State.level/3),7);
+      let delta = Math.max(5, config.deltaStart - g2State.level*config.deltaDecay);
+      
+      const baseH = Math.random()*360;
+      const baseS = 40 + Math.random()*40;
+      const baseL = 40 + Math.random()*40;
+      
+      const diffType = Math.floor(Math.random()*3);
+      let diffH = baseH, diffS = baseS, diffL = baseL;
+      if(diffType===0) diffL = Math.max(0,Math.min(100,baseL + (Math.random()>0.5?delta:-delta)));
+      else if(diffType===1) diffS = Math.max(0,Math.min(100,baseS + (Math.random()>0.5?delta:-delta)));
+      else diffH = (baseH + (Math.random()>0.5?delta:-delta)+360)%360;
+      
+      const gridEl = document.getElementById('g2-grid');
+      gridEl.innerHTML = '';
+      gridEl.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+      
+      const diffIndex = Math.floor(Math.random()*(gridSize*gridSize));
+      
+      for(let i=0;i<gridSize*gridSize;i++) {
+        const tile = document.createElement('div');
+        tile.className = 'color-tile';
+        tile.dataset.index = i;
+        
+        if(i===diffIndex) {
+          tile.style.backgroundColor = `hsl(${diffH}, ${diffS}%, ${diffL}%)`;
+          tile.dataset.correct = '1';
+        } else {
+          tile.style.backgroundColor = `hsl(${baseH}, ${baseS}%, ${baseL}%)`;
+        }
+        
+        tile.addEventListener('click', () => handleG2Click(i===diffIndex));
+        gridEl.appendChild(tile);
+      }
+    }
+    
+    function handleG2Click(correct) {
+      if(g2State.paused) return;
+      
+      if(correct) {
+        g2State.correct++;
+        g2State.score += g2State.level*10;
+        g2State.level++;
+        
+        const scoreEl = document.getElementById('g2-score');
+        scoreEl.textContent = g2State.score;
+        scoreEl.classList.add('bouncing');
+        setTimeout(() => scoreEl.classList.remove('bouncing'),300);
+        
+        document.getElementById('g2-level').textContent = g2State.level;
+        
+        const grid = document.getElementById('g2-grid');
+        grid.classList.add('fade-out');
+        setTimeout(() => {
+          generateG2Grid();
+          grid.classList.remove('fade-out');
+          grid.classList.add('fade-in');
+          setTimeout(() => grid.classList.remove('fade-in'),200);
+        },150);
+      } else {
+        g2State.wrong++;
+        g2State.score = Math.max(0, g2State.score-5);
+        document.getElementById('g2-score').textContent = g2State.score;
+        
+        const container = document.getElementById('g2-grid-container');
+        container.classList.add('shake');
+        container.classList.add('flash-red');
+        setTimeout(() => {
+          container.classList.remove('shake');
+          container.classList.remove('flash-red');
+        },400);
+      }
+    }
+    
+    function finishColorDiffGame() {
+      clearInterval(g2State.timer);
+      document.getElementById('colordiff-playing').classList.add('hidden');
+      document.getElementById('colordiff-result').classList.remove('hidden');
+      
+      document.getElementById('g2-final-score').textContent = g2State.score;
+      document.getElementById('g2-levels').textContent = g2State.level;
+      document.getElementById('g2-correct').textContent = g2State.correct;
+      document.getElementById('g2-wrong').textContent = g2State.wrong;
+      
+      let savedHighScore = 0;
+      try {
+        savedHighScore = parseInt(localStorage.getItem('colorDiffHighScore') || '0');
+      } catch (error) {
+        savedHighScore = 0;
+      }
+      if(g2State.score > savedHighScore) {
+        try {
+          localStorage.setItem('colorDiffHighScore', String(g2State.score));
+        } catch (error) {}
+        document.getElementById('g2-new-record').classList.remove('hidden');
+      }
+    }
+    
+    function updateG2Stats() {
+      document.getElementById('g2-level').textContent = '1';
+      document.getElementById('g2-score').textContent = '0';
+      document.getElementById('g2-timer').textContent = '60';
+    }
+    
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+    
+    bindById('colordiff-start', 'click', startColorDiff);
+    bindById('g2-exit', 'click', () => showPage('main-page'));
+    bindById('g2-play-again', 'click', showColorDiffLanding);
+    bindById('g2-pause', 'click', () => {
+      g2State.paused = !g2State.paused;
+      updatePauseButton();
+    });
+    
+    // ==================== GAME 3: COLORLITE MOSAIC TEST ====================
+    // Color data for the 3 tests (HSL)
+    const szinr = [0,100,28,6,98,28,11,95,28,15,93,28,19,90,27,27,87,26,34,84,25,40,82,26,46,80,26,59,79,26,72,77,25,72,76,24,72,75,22,78,76,23,83,76,23,89,76,23,95,76,22,99,77,21,103,77,19,106,78,20];
+    const szinp = [240,100,29,243,100,29,246,100,28,249,100,27,252,100,26,255,100,26,258,100,25,261,100,25,264,100,24,267,100,24,270,100,23,273,100,22,276,100,21,279,100,21,282,100,20,285,100,20,288,100,19,291,100,18,294,100,17,297,100,17];
+    const szind = [173,37,25,176,29,27,178,23,28,183,16,29,191,10,31,213,7,32,260,5,32,295,8,32,311,13,33,320,18,33,324,22,34,324,25,34,324,28,35,327,35,35,327,42,36,327,45,36,327,48,36,327,50,36,325,62,35,324,74,35];
+    
+    // Background colors for each test
+    const backgrounds = [
+      [111,78,20],
+      [300,100,16],
+      [323,87,34]
+    ];
+    
+    // Indices to highlight for the finish message
+    const highlightIndices = [128,129,130,132,136,138,139,140,146,150,151,154,156,159,164,165,168,170,172,174,177,182,186,189,190,192,195,200,201,202,204,208,210,211,212];
+    
+    let mosaicState = {
+      currentTest: 0,
+      level: 0,
+      results: [0, 0, 0],
+      consecutiveErrors: 0,
+      targetRow: 0,
+      targetCol: 0,
+      isFinished: false,
+      animationFrame: null
+    };
+    
+    let gridData = [];
+    
+    // Get tile size based on screen width
+    function getTileSize() {
+      return window.innerWidth < 760 ? 16 : 30;
+    }
+    
+    // Convert HSL to RGB
+    function hslToRgb(h, s, l) {
+      s /= 100; l /= 100;
+      const k = n => (n + h / 30) % 12;
+      const a = s * Math.min(l, 1 - l);
+      const f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+      return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+    }
+    
+    // Initialize the mosaic game
+    function initMosaic() {
+      console.log('🔧 Initializing Mosaic game...');
+      
+      // 按钮事件
+      bindById('btn-idk', 'click', handleIdk);
+      bindById('btn-restart', 'click', goToLanding);
+      bindById('btn-restart2', 'click', goToLanding);
+      bindById('btn-exit', 'click', exitToGamesMenu);
+      bindById('btn-back', 'click', () => showPage('main-page'));
+      bindById('mosaic-back', 'click', () => showPage('main-page'));
+      bindById('mosaic-start', 'click', (event) => {
+        startMosaicGame();
+      });
+      
+      console.log('🔧 Mosaic game initialized!');
+    }
+    
+    // 去说明页
+    function goToLanding() {
+      console.log('🔄 Going to landing page...');
+      document.getElementById('mosaic-test-view').classList.add('hidden');
+      document.getElementById('mosaic-result-view').classList.add('hidden');
+      document.getElementById('mosaic-landing').classList.remove('hidden');
+    }
+    
+    // 退出到游戏菜单
+    function exitToGamesMenu() {
+      console.log('🚪 Exiting to games menu...');
+      showPage('main-page');
+    }
+    
+    // 开始马赛克游戏
+    function startMosaicGame() {
+      console.log('🎮 Starting Mosaic game...');
+      document.getElementById('mosaic-landing').classList.add('hidden');
+      document.getElementById('mosaic-result-view').classList.add('hidden');
+      document.getElementById('mosaic-test-view').classList.remove('hidden');
+      restart();
+    }
+    
+    // Reset and restart the test
+    function restart() {
+      console.log('🔄 Restarting mosaic test...');
+      
+      mosaicState = {
+        currentTest: 0,
+        level: 0,
+        results: [0, 0, 0],
+        consecutiveErrors: 0,
+        targetRow: 0,
+        targetCol: 0,
+        isFinished: false,
+        animationFrame: null
+      };
+      
+      document.getElementById('mosaic-result-view').classList.add('hidden');
+      document.getElementById('mosaic-test-view').classList.remove('hidden');
+      document.getElementById('komment').textContent = t('mosaic.hint');
+      
+      // 初始化网格和目标
+      initGrid();
+      pickRandomTarget();
+      applyTargetColor();
+      updateScore();
+      
+      // 设置Canvas
+      setupCanvas();
+      
+      // 开始渲染
+      if (mosaicState.animationFrame) cancelAnimationFrame(mosaicState.animationFrame);
+      render();
+      
+      console.log(`🎯 Target position: (${mosaicState.targetCol}, ${mosaicState.targetRow})`);
+      console.log(`📊 Test: ${mosaicState.currentTest}, Level: ${mosaicState.level}`);
+    }
+    
+    function setupCanvas() {
+      const canvas = document.getElementById('mosaic-canvas');
+      const tileSize = getTileSize();
+      const canvasSize = 18 * tileSize;
+      
+      // 设置Canvas尺寸
+      canvas.width = canvasSize;
+      canvas.height = canvasSize;
+      
+      // 设置CSS显示尺寸
+      const displaySize = Math.min(480, window.innerWidth - 40);
+      canvas.style.width = displaySize + 'px';
+      canvas.style.height = displaySize + 'px';
+      canvas.style.backgroundColor = '#000';
+      canvas.style.cursor = 'pointer';
+      canvas.style.pointerEvents = 'auto';
+      
+      // 绑定点击事件
+      canvas.onclick = handleCanvasClick;
+    }
+    
+    // Initialize the grid
+    function initGrid() {
+      gridData = [];
+      for (let i = 0; i < 18 * 18; i++) {
+        const row = Math.floor(i / 18);
+        const col = i % 18;
+        gridData.push({
+          baseL: backgrounds[mosaicState.currentTest][2],
+          phase: Math.random() * Math.PI * 4,
+          freq: 0.8 + Math.random() * 2.0,
+          amplitude: 4 + Math.random() * 6,
+          row: row,
+          col: col
+        });
+      }
+    }
+    
+    // Apply target color to the 3x3 area
+    function applyTargetColor() {
+      const szinArray = [szinr, szinp, szind][mosaicState.currentTest];
+      const hIndex = mosaicState.level * 3;
+      const targetH = szinArray[hIndex];
+      const targetS = szinArray[hIndex + 1];
+      const targetL = szinArray[hIndex + 2];
+      
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const row = mosaicState.targetRow + dr;
+          const col = mosaicState.targetCol + dc;
+          if (row >= 0 && row < 18 && col >= 0 && col < 18) {
+            const idx = row * 18 + col;
+            gridData[idx].baseL = targetL;
+          }
+        }
+      }
+    }
+    
+    function pickRandomTarget() {
+      mosaicState.targetRow = 1 + Math.floor(Math.random() * 16);
+      mosaicState.targetCol = 1 + Math.floor(Math.random() * 16);
+    }
+    
+    function handleCanvasClick(e) {
+      console.log('🎯 Canvas clicked!');
+      if (mosaicState.isFinished) return;
+      
+      const canvas = document.getElementById('mosaic-canvas');
+      const rect = canvas.getBoundingClientRect();
+      const tileSize = getTileSize();
+      
+      // 获取点击位置
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      // 转换为网格坐标
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const col = Math.floor((x * scaleX) / tileSize);
+      const row = Math.floor((y * scaleY) / tileSize);
+      
+      console.log(`📍 Click: (${col}, ${row}), Target: (${mosaicState.targetCol}, ${mosaicState.targetRow})`);
+      
+      // Check hit
+      const isHit = Math.abs(row - mosaicState.targetRow) <= 1 && Math.abs(col - mosaicState.targetCol) <= 1;
+      
+      if (isHit) {
+        console.log('✅ Hit!');
+        mosaicState.consecutiveErrors = 0;
+        nextLevel();
+      } else {
+        console.log('❌ Miss');
+        mosaicState.consecutiveErrors++;
+        if (mosaicState.consecutiveErrors >= 2) {
+          nextTest();
+        }
+      }
+    }
+    
+    function nextLevel() {
+      mosaicState.level++;
+      updateScore();
+      
+      if (mosaicState.level >= 20) {
+        nextTest();
+      } else {
+        pickRandomTarget();
+        initGrid();
+        applyTargetColor();
+      }
+    }
+    
+    function nextTest() {
+      mosaicState.results[mosaicState.currentTest] = Math.floor(100 * mosaicState.level / 20);
+      mosaicState.currentTest++;
+      mosaicState.level = 0;
+      mosaicState.consecutiveErrors = 0;
+      
+      if (mosaicState.currentTest >= 3) {
+        showResult();
+      } else {
+        pickRandomTarget();
+        initGrid();
+        applyTargetColor();
+        updateScore();
+      }
+    }
+    
+    function updateScore() {
+      document.getElementById('p1').textContent = (mosaicState.currentTest === 0 ? Math.floor(100 * mosaicState.level / 20) : mosaicState.results[0]) + '%';
+      document.getElementById('p2').textContent = (mosaicState.currentTest === 1 ? Math.floor(100 * mosaicState.level / 20) : mosaicState.results[1]) + '%';
+      document.getElementById('p3').textContent = (mosaicState.currentTest === 2 ? Math.floor(100 * mosaicState.level / 20) : mosaicState.results[2]) + '%';
+    }
+    
+    function showResult() {
+      mosaicState.isFinished = true;
+      if (mosaicState.animationFrame) cancelAnimationFrame(mosaicState.animationFrame);
+      
+      document.getElementById('mosaic-test-view').classList.add('hidden');
+      document.getElementById('mosaic-result-view').classList.remove('hidden');
+      
+      document.getElementById('rp1').textContent = mosaicState.results[0] + '%';
+      document.getElementById('rp2').textContent = mosaicState.results[1] + '%';
+      document.getElementById('rp3').textContent = mosaicState.results[2] + '%';
+      
+      updateMosaicDiagnosis();
+    }
+    
+    function handleIdk() {
+      console.log('😕 I don\'t know button clicked');
+      if (mosaicState.results[0] > 80) {
+        mosaicState.results[1] = mosaicState.results[0];
+        mosaicState.results[2] = mosaicState.results[0];
+        showResult();
+      } else {
+        mosaicState.consecutiveErrors++;
+        if (mosaicState.consecutiveErrors >= 2) {
+          nextTest();
+        } else {
+          // Just increment error count and pick new target
+          pickRandomTarget();
+          initGrid();
+          applyTargetColor();
+        }
+      }
+    }
+    
+    function render() {
+      const canvas = document.getElementById('mosaic-canvas');
+      const ctx = canvas.getContext('2d');
+      const tileSize = getTileSize();
+      
+      const bgH = backgrounds[mosaicState.currentTest][0];
+      const bgS = backgrounds[mosaicState.currentTest][1];
+      const szinArray = [szinr, szinp, szind][mosaicState.currentTest];
+      const hIndex = mosaicState.level * 3;
+      const targetH = szinArray[hIndex];
+      const targetS = szinArray[hIndex + 1];
+      
+      const time = Date.now();
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      for (let row = 0; row < 18; row++) {
+        for (let col = 0; col < 18; col++) {
+          const idx = row * 18 + col;
+          const cell = gridData[idx];
+          
+          let isTarget = false;
+          if (!mosaicState.isFinished) {
+            isTarget = Math.abs(row - mosaicState.targetRow) <= 1 && Math.abs(col - mosaicState.targetCol) <= 1;
+          }
+          
+          let h, s, l;
+          
+          if (mosaicState.isFinished && highlightIndices.includes(idx)) {
+            h = 60; s = 99; l = 95;
+          } else if (isTarget) {
+            h = targetH;
+            s = targetS;
+            const wave1 = Math.sin(time * cell.freq * 0.003 + cell.phase);
+            const wave2 = Math.sin(time * cell.freq * 0.007 + cell.phase * 1.5);
+            l = cell.baseL + (wave1 * 0.7 + wave2 * 0.3) * cell.amplitude;
+          } else {
+            h = bgH;
+            s = bgS;
+            const wave1 = Math.sin(time * cell.freq * 0.003 + cell.phase);
+            const wave2 = Math.sin(time * cell.freq * 0.007 + cell.phase * 1.5);
+            l = cell.baseL + (wave1 * 0.7 + wave2 * 0.3) * cell.amplitude;
+          }
+          
+          const rgb = hslToRgb(h, s, l);
+          
+          ctx.fillStyle = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+          ctx.fillRect(col * tileSize, row * tileSize, tileSize - 3, tileSize - 3);
+        }
+      }
+      
+      if (!mosaicState.isFinished) {
+        mosaicState.animationFrame = requestAnimationFrame(render);
+      }
+    }
+    
+    // ==================== 主菜单功能 ====================
+    let currentTab = 'image';
+    let currentColorType = 'normal';
+    let currentColor = '#d6643e';
+    
+    const COMMON_COLORS = [
+      '#e63946', '#457b9d', '#1d3557', '#f4a261',
+      '#2a9d8f', '#e76f51', '#2ec4b6', '#ffbe0b',
+      '#fb5607', '#ff006e', '#8338ec', '#3a86ff'
+    ];
+
+    // 工具函数
+    function clamp(value) {
+      return Math.max(0, Math.min(255, Math.round(value)));
+    }
+
+    function isValidHex(hex) {
+      return /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.test(hex);
+    }
+
+    function normalizeHex(hex) {
+      let clean = hex.replace('#', '').toLowerCase();
+      return '#' + clean.padStart(6, '0').slice(0, 6);
+    }
+
+    function hexToRgb(hex) {
+      if (!isValidHex(hex)) return { r: 0, g: 0, b: 0 };
+      const h = hex.replace('#', '');
+      return {
+        r: parseInt(h.slice(0, 2), 16),
+        g: parseInt(h.slice(2, 4), 16),
+        b: parseInt(h.slice(4, 6), 16)
+      };
+    }
+
+    function rgbToHex(r, g, b) {
+      const toHex = (n) => clamp(n).toString(16).padStart(2, '0');
+      return '#' + toHex(r) + toHex(g) + toHex(b);
+    }
+
+    function applyMatrix(r, g, b, type) {
+      const m = ColorBlindMatrix[type];
+      if (!m) return { r, g, b };
+
+      const r2 = m[0] * r + m[1] * g + m[2] * b;
+      const g2 = m[3] * r + m[4] * g + m[5] * b;
+      const b2 = m[6] * r + m[7] * g + m[8] * b;
+
+      return {
+        r: clamp(r2),
+        g: clamp(g2),
+        b: clamp(b2)
+      };
+    }
+
+    function simulateHex(hex, type) {
+      const rgb = hexToRgb(hex);
+      const simulated = applyMatrix(rgb.r, rgb.g, rgb.b, type);
+      return rgbToHex(simulated.r, simulated.g, simulated.b);
+    }
+
+    // 渲染模式卡片
+    function renderModeCards() {
+      const grid = document.getElementById('mode-cards-grid');
+      if (!grid) return;
+
+      grid.innerHTML = CVD_TYPE_KEYS.map(typeKey => {
+        const cvd = getTypeInfo(typeKey);
+        const simulatedHex = simulateHex(currentColor, cvd.key);
+        const isActive = cvd.key === currentColorType;
+
+        return `
+          <div class="mode-card ${isActive ? 'active' : ''}" data-cvd="${cvd.key}">
+            <div class="mode-card-top">
+              <div class="mode-color-swatch" style="background: ${simulatedHex}"></div>
+              <div class="mode-card-info">
+                <h3>${cvd.name}</h3>
+                <span class="hex">${simulatedHex}</span>
+              </div>
+            </div>
+            <div class="mode-card-description">${cvd.description}</div>
+          </div>
+        `;
+      }).join('');
+
+      // 绑定点击事件
+      grid.querySelectorAll('.mode-card').forEach(card => {
+        card.addEventListener('click', () => {
+          currentColorType = card.dataset.cvd;
+          renderModeCards();
+          updateComparison();
+        });
+      });
+    }
+
+    // 更新对比区域
+    function updateComparison() {
+      const simulatedHex = simulateHex(currentColor, currentColorType);
+      const cvd = getTypeInfo(currentColorType);
+
+      const originalColor = document.getElementById('original-color');
+      const originalHex = document.getElementById('original-hex');
+      const simulatedLabel = document.getElementById('simulated-type-label');
+      const simulatedTypeName = simulatedLabel ? simulatedLabel.querySelector('.type-name') : null;
+      const simulatedPrevalence = document.getElementById('simulated-prevalence');
+      const simulatedColor = document.getElementById('simulated-color');
+      const simulatedHexEl = document.getElementById('simulated-hex');
+
+      if (originalColor) originalColor.style.background = currentColor;
+      if (originalHex) originalHex.textContent = currentColor;
+      if (simulatedTypeName && cvd) simulatedTypeName.textContent = cvd.name;
+      if (simulatedPrevalence && cvd) simulatedPrevalence.textContent = cvd.prevalence;
+      if (simulatedColor) simulatedColor.style.background = simulatedHex;
+      if (simulatedHexEl) simulatedHexEl.textContent = simulatedHex;
+    }
+
+    // 初始化颜色模式
+    function initColorMode() {
+      const colorPicker = document.getElementById('color-picker');
+      const hexInput = document.getElementById('hex-input');
+
+      if (colorPicker) {
+        colorPicker.addEventListener('input', (e) => {
+          currentColor = e.target.value;
+          if (hexInput) hexInput.value = currentColor;
+          renderModeCards();
+          updateComparison();
+        });
+      }
+
+      if (hexInput) {
+        hexInput.addEventListener('input', (e) => {
+          const value = e.target.value;
+          if (isValidHex(value)) {
+            currentColor = normalizeHex(value);
+            if (colorPicker) colorPicker.value = currentColor;
+          }
+          renderModeCards();
+          updateComparison();
+        });
+      }
+
+      renderModeCards();
+      updateComparison();
+    }
+    
+    function initMenu() {
+      document.querySelectorAll('.menu-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          switchTab(tab.dataset.tab);
+        });
+      });
+
+      const langEnBtn = document.getElementById('lang-en-btn');
+      const langZhBtn = document.getElementById('lang-zh-btn');
+      if (langEnBtn) langEnBtn.addEventListener('click', () => applyLanguage('en'));
+      if (langZhBtn) langZhBtn.addEventListener('click', () => applyLanguage('zh'));
+      
+      initColorMode();
+      initContrastChecker();
+    }
+    
+    // 对比度检查器初始化
+    function initContrastChecker() {
+      const bgColorPicker = document.getElementById('bg-color-picker');
+      const bgHexInput = document.getElementById('bg-hex-input');
+      const fgColorPicker = document.getElementById('fg-color-picker');
+      const fgHexInput = document.getElementById('fg-hex-input');
+      const flipBtn = document.getElementById('flip-colors-btn');
+
+      // 对比度区的翻转按钮当前可能不存在，避免初始化时报错阻断后续游戏事件绑定
+      if (!bgColorPicker || !bgHexInput || !fgColorPicker || !fgHexInput) return;
+      
+      // 背景色变化
+      bgColorPicker.addEventListener('input', (e) => {
+        bgHexInput.value = e.target.value;
+        updateContrast();
+      });
+      
+      bgHexInput.addEventListener('input', (e) => {
+        const hex = validateHex(e.target.value);
+        bgColorPicker.value = hex;
+        updateContrast();
+      });
+      
+      // 前景色变化
+      fgColorPicker.addEventListener('input', (e) => {
+        fgHexInput.value = e.target.value;
+        updateContrast();
+      });
+      
+      fgHexInput.addEventListener('input', (e) => {
+        const hex = validateHex(e.target.value);
+        fgColorPicker.value = hex;
+        updateContrast();
+      });
+      
+      // 翻转颜色
+      if (flipBtn) {
+        flipBtn.addEventListener('click', () => {
+          const tempBg = bgColorPicker.value;
+          const tempFg = fgColorPicker.value;
+          bgColorPicker.value = tempFg;
+          fgColorPicker.value = tempBg;
+          bgHexInput.value = tempFg;
+          fgHexInput.value = tempBg;
+          updateContrast();
+        });
+      }
+      
+      updateContrast();
+    }
+    
+    // 验证并规范化Hex颜色
+    function validateHex(hex) {
+      hex = hex.replace(/[^0-9a-fA-F]/g, '');
+      if (hex.length >= 6) {
+        return '#' + hex.substring(0, 6);
+      } else if (hex.length >= 3) {
+        return '#' + hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+      }
+      return '#000000';
+    }
+    
+    // Hex转RGB
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+      } : null;
+    }
+    
+    // 计算相对亮度
+    function getLuminance(r, g, b) {
+      const a = [r, g, b].map(v => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
+      return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+    }
+    
+    // 计算对比度
+    function getContrastRatio(l1, l2) {
+      const lighter = Math.max(l1, l2);
+      const darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+    
+    // 更新对比度显示
+    function updateContrast() {
+      const bgHex = document.getElementById('bg-color-picker').value;
+      const fgHex = document.getElementById('fg-color-picker').value;
+      
+      const bgRgb = hexToRgb(bgHex);
+      const fgRgb = hexToRgb(fgHex);
+      
+      const bgLuminance = getLuminance(bgRgb.r, bgRgb.g, bgRgb.b);
+      const fgLuminance = getLuminance(fgRgb.r, fgRgb.g, fgRgb.b);
+      
+      const ratio = getContrastRatio(bgLuminance, fgLuminance);
+      const ratioText = ratio.toFixed(2) + ':1';
+      
+      document.getElementById('ratio-value').textContent = ratioText;
+      
+      // 更新预览
+      const preview = document.getElementById('contrast-preview');
+      preview.style.backgroundColor = bgHex;
+      preview.querySelectorAll('p').forEach(el => {
+        el.style.color = fgHex;
+      });
+      
+      // 更新合规性状态
+      updateComplianceStatus(ratio);
+    }
+    
+    // 更新WCAG合规性状态
+    function updateComplianceStatus(ratio) {
+      // AA Normal (4.5:1)
+      updateStatus('aa-normal-status', ratio >= 4.5);
+      
+      // AA Large (3:1)
+      updateStatus('aa-large-status', ratio >= 3);
+      
+      // AAA Normal (7:1)
+      updateStatus('aaa-normal-status', ratio >= 7);
+      
+      // AAA Large (4.5:1)
+      updateStatus('aaa-large-status', ratio >= 4.5);
+    }
+    
+    function updateStatus(elementId, pass) {
+      const el = document.getElementById(elementId);
+      if (pass) {
+        el.classList.remove('fail');
+        el.classList.add('pass');
+        el.textContent = '✓';
+      } else {
+        el.classList.remove('pass');
+        el.classList.add('fail');
+        el.textContent = '✗';
+      }
+    }
+    
+    function switchTab(tab) {
+      currentTab = tab;
+      
+      document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.menu-tab[data-tab="${tab}"]`).classList.add('active');
+      
+      document.getElementById('image-content').classList.add('hidden');
+      document.getElementById('color-content').classList.add('hidden');
+      document.getElementById('games-content').classList.add('hidden');
+      document.getElementById('contrast-content').classList.add('hidden');
+      
+      document.getElementById(`${tab}-content`).classList.remove('hidden');
+      
+      updateSubtitle();
+      
+      if(tab === 'color') {
+        renderModeCards();
+        updateComparison();
+      }
+    }
+    
+    // 确保DOM完全加载后再绑定事件监听器
+    function initEventListeners() {
+      console.log('✅ 正在绑定游戏卡片事件监听器...');
+      
+      // 确保游戏卡片的点击事件
+      const game1Card = document.getElementById('game1-card');
+      const game2Card = document.getElementById('game2-card');
+      const game3Card = document.getElementById('game3-card');
+      
+      if(game1Card) {
+        game1Card.style.cursor = 'pointer';
+        game1Card.addEventListener('click', function(e) {
+          console.log('👆 点击了游戏1卡片 (找数字)');
+          e.preventDefault();
+          showPage('ishihara-page');
+        });
+      }
+      
+      if(game2Card) {
+        game2Card.style.cursor = 'pointer';
+        game2Card.addEventListener('click', function(e) {
+          console.log('👆 点击了游戏2卡片 (找色差)');
+          e.preventDefault();
+          showPage('colordiff-page');
+        });
+      }
+      
+      if(game3Card) {
+        game3Card.style.cursor = 'pointer';
+        game3Card.addEventListener('click', function(e) {
+          console.log('👆 点击了游戏3卡片 (马赛克)');
+          e.preventDefault();
+          showPage('mosaic-page');
+        });
+      }
+      
+      console.log('✅ 事件监听器绑定完成');
+    }
+    
+    // 等待DOM加载完成
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function() {
+        initImageMode();
+        initMenu();
+        initEventListeners();
+        initIshihara();
+        initColorDiff();
+        initMosaic();
+        applyLanguage('en');
+      });
+    } else {
+      initImageMode();
+      initMenu();
+      initEventListeners();
+      initIshihara();
+      initColorDiff();
+      initMosaic();
+      applyLanguage('en');
+    }
+  </script>
+</body>
+</html>
